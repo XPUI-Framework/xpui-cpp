@@ -1,0 +1,42 @@
+[package]
+name = "xpui-cpp-host"
+description = "The Rust half of a C++ application hosting xpui screens"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+# The name is set explicitly rather than derived from the package, because
+# CMake links the archive by path: renaming the package would otherwise move
+# `libxpui_cpp_host.a` and the link would fail somewhere far from the cause.
+name = "xpui_cpp_host"
+path = "src/lib.rs"
+
+# `staticlib` is what C++ links. `rlib` is what a Rust consumer would use, and
+# what keeps `cargo build --workspace` honest about this crate compiling.
+crate-type = ["staticlib", "rlib"]
+
+# No Rust test harness. Every `xpui_host_*` symbol this crate calls is defined
+# by the C++ half, so a test binary could only link against doubles — a fourth
+# place for the ABI to rot, testing a wrapper that adds no logic of its own.
+# What this crate actually has to prove is that the whole stack links and
+# draws, and that is `xpui-host --selftest`, run by ctest.
+test = false
+
+# Off for the same reason, and it has to be said separately: `test = false`
+# turns off the unit-test harness but not doctests, and a doctest is a binary
+# that links this crate like any other. So the examples in these modules are
+# fenced `text` with the reason stated where they are written.
+doctest = false
+
+[dependencies]
+xpui.workspace = true
+# The backend. **Never with `testing`**: that feature swaps every C symbol for
+# a host double, so a staticlib built with it links cleanly into the C++ and
+# draws nothing at all. Resolver v3 keeps dev-dependency features out of a
+# normal build, so nothing here can turn it on by accident — but it is the one
+# mistake in this crate that fails silently, so it is written down.
+xpui-fui.workspace = true

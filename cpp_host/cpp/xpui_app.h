@@ -1,0 +1,35 @@
+// What the application exports, and this host calls.
+//
+// The fourth and smallest of the four headers on this boundary, and the only
+// one whose symbols are defined in `src/`. `xpui_screen.h` covers driving a
+// screen once you have one; this is how you get one, and how the framework is
+// wired up before the first frame.
+//
+// Adding a screen the host can open directly is one `register_screen!` line in
+// `src/lib.rs` and one declaration here.
+
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Installs what paints and what navigates.
+//
+// Call ONCE, from the thread that runs the frame loop, before creating the
+// first screen. The framework keeps both as plain statics with no locking, so
+// installing while a frame is in flight is a data race rather than a stale
+// pointer — see `xpui::host::install`.
+//
+// Note the ordering with `xpui_fui_attach`: attaching only tells the *shim*
+// where the panel is, and this tells the *framework* where the shim is.
+// Neither works without the other, and nothing checks that both happened.
+void xpui_app_install(void);
+
+// Builds the root screen. The handle belongs to the caller from here on; see
+// `xpui_screen.h` for what to do with it.
+void* xpui_app_create_menu(void);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
