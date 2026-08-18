@@ -66,6 +66,20 @@ unsafe extern "C" {
     pub fn xpui_host_firmware_version() -> *const u8;
     pub safe fn xpui_host_battery_percent() -> i32;
 
+    // -- panics --------------------------------------------------------------
+    /// Where a Rust panic goes.
+    ///
+    /// Only ever called from a device build — on a desktop the standard
+    /// library has its own handler. Every implementation aborts; the caller
+    /// spins afterwards rather than relying on that.
+    ///
+    /// Declared only where it is used, or it is dead code on the host and
+    /// warnings are failures. The gate's symbol check and `tests/abi.rs` both
+    /// read this file as text, so the `cfg` is invisible to them and the
+    /// header still has to declare it.
+    #[cfg(target_os = "none")]
+    pub fn xpui_host_panic(message: *const u8);
+
     // -- heap ----------------------------------------------------------------
     //
     // What the host can measure of its own allocations. On a firmware Rust

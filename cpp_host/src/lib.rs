@@ -31,6 +31,7 @@ mod device;
 mod heap;
 mod platform;
 mod raw;
+mod runtime;
 mod shell;
 mod strings;
 

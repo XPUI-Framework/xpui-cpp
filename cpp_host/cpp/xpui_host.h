@@ -113,6 +113,25 @@ int32_t xpui_host_heap_free(void);
 int32_t xpui_host_heap_largest_block(void);
 int32_t xpui_host_heap_min_free(void);
 
+// -- panics ------------------------------------------------------------------
+
+// Where a Rust panic lands on a device.
+//
+// Only reached from a firmware build: on a desktop the standard library has
+// its own handler and a second would be a link error. Nothing can be
+// recovered — the framework builds with `panic = "abort"` — so this does not
+// return, and the most useful thing it can do is say so somewhere a person
+// will see.
+//
+// It does not return in practice — every implementation aborts — but it is
+// declared plainly, without `__attribute__((noreturn))`, because the ABI type
+// checker in `crates/backend/fui/tests/abi.rs` reads declarations rather than
+// parsing C, and an attribute after the parameter list defeats it. The Rust
+// side spins after calling, so nothing depends on the attribute.
+//
+// `message` is BORROWED FOR THE CALL and is never null.
+void xpui_host_panic(const uint8_t* message);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
