@@ -43,6 +43,20 @@ impl Platform for HostPlatform {
         raw::xpui_host_was_released(Self::tag(button)) != 0
     }
 
+    /// True for the desktop host: `Input.cpp` maps `SDLK_LEFT` and `SDLK_RIGHT`
+    /// onto them, so a value control nudges here as it does on a reader.
+    ///
+    /// **This platform has a second consumer**, and they do not agree.
+    /// `examples/firmware` links this same `xpui-cpp-host` package for two
+    /// ESP32 boards — an X3, which does carry the pair, and a Seeed Sticky,
+    /// which does not. A constant is right for the keyboard and for the X3 and
+    /// wrong for the Sticky; nothing reads the answer yet, so nothing is broken,
+    /// and the fix when something does is to ask the host which board it is on
+    /// rather than to pick a better constant.
+    fn has_left_right_keys(&self) -> bool {
+        true
+    }
+
     fn was_home_gesture(&self) -> bool {
         raw::xpui_host_was_home_gesture() != 0
     }
