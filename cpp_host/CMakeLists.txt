@@ -191,9 +191,10 @@ add_test(NAME back_pops_to_the_root
 # nothing else exercises it, and a host missing the scrim went unnoticed in the
 # sibling firmware until a test finally opened one.
 #
-# The keys walk to the Refresh-mode row: the focus order puts the slider first,
-# so `down,confirm,confirm` opens nothing at all and leaves a frame identical to
-# the run without the third key.
+# The keys walk to the Refresh-mode row, past the focus stops above it — a
+# slider, a stepper and a toggle. Adding or removing a focusable control on that
+# screen changes how many `down`s that takes, and the band below says so rather
+# than passing quietly.
 #
 # `--expect-ink` is what makes this a test rather than a click. A scrim is ink
 # on one checkerboard parity of everything behind the dialog, so the panel goes
@@ -202,12 +203,16 @@ add_test(NAME back_pops_to_the_root
 # **Bounded on both sides, and the upper bound is not padding.** A dialog whose
 # body never paints leaves the scrim covering the area the popup's own panel
 # would have cleared, so the figure goes *up*, to 51%. A one-sided assertion
-# gets greener as the dialog disappears. 30..48 fails that, and fails every
-# off-by-one in the key sequence below (2%, 11%, 11%).
+# gets greener as the dialog disappears.
+#
+# 30..48 fails that, and fails every off-by-one in the key sequence below.
+# Measured: the sequence as written reads 44%; one `down` short reads 11%, one
+# `down` long reads 2%, dropping the leading `down` reads 3%, and dropping the
+# final `confirm` reads 10%.
 #
 # Measured at the default 480x800. Changing that default means re-measuring.
 add_test(NAME draws_an_overlay
-         COMMAND xpui-host --headless --frames 20 --keys down,confirm,down,down,confirm --selftest
+         COMMAND xpui-host --headless --frames 20 --keys down,confirm,down,down,down,confirm --selftest
                  --expect-depth 2 --expect-ink 30 --expect-ink-at-most 48)
 
 # The control for that band: the same screen with no dialog on it. Without this

@@ -88,8 +88,8 @@ impl Screen for Controls {
             List::new().push(
                 ListRow::new(tr(c"STR_CONTROLS_LEVEL")).value(&self.level_label),
             ),
-            // A bare slider takes touch only, so the stepper sits beside it for
-            // a host driven by buttons: one value, two ways to move it.
+            // One value, two controls: a plain track and a stepper with a
+            // glyph at each end.
             Slider::new(self.level, 100).on_change(Msg::Level),
             Stepper::new(self.level)
                 .on_change(Msg::Level)
