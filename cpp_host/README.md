@@ -44,12 +44,18 @@ stops agreeing about *names*. It cannot see types — two parameters swapped
 still links, and still corrupts the call frame — which is what
 [spec 07](../../docs/specs/07-ffi-checker.md) is for.
 
-## What maps to what in CrossPoint
+## What this was modelled on
 
-The firmware this mirrors is `~/Developer/Xteink/worktrees/xpui-extracted`.
-**An FFI change there should be mirrored here, and nothing links the two.**
+This host mirrors the layering of the e-reader firmware it was modelled on,
+which is why the map below is worth reading before moving a file. **It is a
+reference, not an obligation**: this host is what the gate builds and runs, and
+what an ABI change is designed and proven against. A firmware consuming the ABI
+is on its own cadence, and nothing links the two.
 
-| Here | CrossPoint |
+The right-hand column is that firmware's paths, kept so the shapes can be
+compared.
+
+| Here | The firmware it was modelled on |
 |---|---|
 | `cpp/main.cpp` | `src/main.cpp`, and the Arduino loop |
 | `cpp/ScreenHost.{h,cpp}` | `src/activities/ActivityRs.{h,cpp}` |
