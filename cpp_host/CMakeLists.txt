@@ -225,3 +225,49 @@ add_test(NAME draws_an_overlay
 add_test(NAME a_plain_screen_is_mostly_paper
          COMMAND xpui-host --headless --frames 20 --keys down,confirm --selftest
                  --expect-depth 2 --expect-ink-at-most 20)
+
+# -- the three states of a value control --------------------------------------
+#
+# `Chrome::draw_slider` takes a state, and this shim is one of the two backends
+# that answers it. Nothing else here reaches the second and third: the keyboard
+# has arrow keys, so the framework nudges a value in place and **never opens an
+# edit** — which is why these runs pass `--no-pair` and answer as a board with
+# four keys does.
+#
+# **Cropped to the controls**, and that is the whole point rather than tidiness.
+# The hint bar changes whenever the keys change meaning, so two whole frames
+# always differ somewhere: a full-frame comparison passes while the control it
+# was asked about is byte-identical. That is exactly what was here — an open
+# control filled its band with paper, over paper, so `focused` and `editing`
+# emitted the same ink and the acceptance box was ticked anyway.
+#
+# Measured at the default 480x800. Inside the band: the plain slider's knob at
+# y 186..204, the stepper's at y 276..294, and an open control's outline at
+# y 248..323. Outside it, and deliberately: the hint bar at y 762..780, and
+# **the toggle's own focus mark at y 353..428**.
+#
+# That last one is the trap rather than the panel size. The toggle is the other
+# thing that differs between the two runs of the first case, so a layout change
+# that pulled its mark into this band would leave that case passing on the
+# toggle and saying nothing about the knob it was written for. The band ends at
+# y 334, nineteen pixels clear. Re-measure if either moves.
+set(CONTROL_BAND --crop 0,175,480,160)
+set(STATE_RUN --headless --no-pair --selftest --expect-depth 2 ${CONTROL_BAND})
+
+# `down,confirm` opens Controls and lands the keys on the plain slider; one
+# `down` moves to the stepper, and a second leaves both behind for the toggle.
+add_test(NAME a_focused_value_control_differs_from_an_idle_one
+         COMMAND "${CMAKE_COMMAND}"
+                 -D "HOST=$<TARGET_FILE:xpui-host>"
+                 -D "ARGS_A=${STATE_RUN};--frames;18;--keys;down,confirm,down,down"
+                 -D "ARGS_B=${STATE_RUN};--frames;16;--keys;down,confirm,down"
+                 -D "OUT_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+                 -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/frames_differ.cmake")
+
+add_test(NAME an_open_value_control_differs_from_a_focused_one
+         COMMAND "${CMAKE_COMMAND}"
+                 -D "HOST=$<TARGET_FILE:xpui-host>"
+                 -D "ARGS_A=${STATE_RUN};--frames;16;--keys;down,confirm,down"
+                 -D "ARGS_B=${STATE_RUN};--frames;18;--keys;down,confirm,down,confirm"
+                 -D "OUT_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+                 -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/frames_differ.cmake")

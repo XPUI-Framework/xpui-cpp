@@ -51,6 +51,16 @@ uint8_t xpui_host_was_released(uint8_t button);
 // host applies its own meaning only when the screen declines it.
 uint8_t xpui_host_was_home_gesture(void);
 
+// Whether this device has a Left/Right pair.
+//
+// **The host answers, because only the host knows.** This binary is built for
+// a keyboard, which has the pair, and for boards that do not; the framework
+// branches on the answer — a device without the pair opens a value control on
+// Confirm and takes over four keys while it is open — so a constant compiled
+// into the framework side would be wrong for half the devices that link it.
+// `--no-pair` is what a headless run uses to exercise the other half.
+uint8_t xpui_host_has_left_right_keys(void);
+
 // Milliseconds since the host started. The only clock the framework has, and
 // what key auto-repeat is timed against.
 uint32_t xpui_host_millis(void);

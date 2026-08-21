@@ -39,6 +39,17 @@ class Display {
   // Opens a window `scale` times the panel size. False when SDL will not.
   bool openWindow(int scale, const char* title);
 
+  // A rectangle of the panel. Any non-positive extent means the whole of it,
+  // which is what a default-constructed one has.
+  struct Rect {
+    int x;
+    int y;
+    int width;
+    int height;
+
+    bool empty() const { return width <= 0 || height <= 0; }
+  };
+
   // Converts the framebuffer to pixels, and shows them if there is a window.
   void blit();
 
@@ -46,7 +57,13 @@ class Display {
   //
   // Hand-rolled rather than `SDL_SaveBMP`: headless must not need SDL to have
   // been initialised, and the format is 45 lines.
-  bool writeBmp(const char* path) const;
+  //
+  // A non-empty `crop` writes that rectangle only, clipped to the panel. What
+  // it is for: comparing two runs that differ in one band. A whole frame is the
+  // wrong unit for that — the hint bar changes whenever the keys change
+  // meaning, so two frames always differ somewhere and a whole-frame comparison
+  // passes without ever looking at the control it was asked about.
+  bool writeBmp(const char* path, Rect crop = Rect{}) const;
 
   // Whether the framebuffer holds both ink and paper.
   //

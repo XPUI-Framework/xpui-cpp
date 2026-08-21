@@ -26,6 +26,13 @@ extern ScreenHost* g_screen;
 // Bound once by main, because neither depends on which screen is running.
 extern Input* g_input;
 extern ScreenStack* g_stack;
+extern bool g_hasLeftRightKeys;
+
+// What `xpui_host_has_left_right_keys` answers.
+//
+// The host's own business, so it is declared here rather than in
+// `xpui_host.h`: the framework asks the question and never sets the answer.
+void setHasLeftRightKeys(bool present);
 
 // Copies `text` somewhere that is never freed, and returns it.
 //

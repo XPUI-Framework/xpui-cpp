@@ -4,6 +4,7 @@
 #include <string.h>
 #include <xpui_fui.h>
 
+#include <algorithm>
 #include <cstdio>
 
 namespace {
@@ -120,9 +121,17 @@ void Display::blit() {
   SDL_RenderPresent(renderer_);
 }
 
-bool Display::writeBmp(const char* path) const {
-  const size_t rowBytes = bmpStride(width_);
-  const uint32_t imageBytes = static_cast<uint32_t>(rowBytes * static_cast<size_t>(height_));
+bool Display::writeBmp(const char* path, const Rect crop) const {
+  // Clipped rather than rejected: a caller asking for a band that runs off the
+  // panel gets what is there, and a caller asking for nothing gets everything.
+  const int left = crop.empty() ? 0 : std::max(0, std::min(crop.x, width_));
+  const int top = crop.empty() ? 0 : std::max(0, std::min(crop.y, height_));
+  const int width = crop.empty() ? width_ : std::min(crop.width, width_ - left);
+  const int height = crop.empty() ? height_ : std::min(crop.height, height_ - top);
+  if (width <= 0 || height <= 0) return false;
+
+  const size_t rowBytes = bmpStride(width);
+  const uint32_t imageBytes = static_cast<uint32_t>(rowBytes * static_cast<size_t>(height));
 
   uint8_t header[54] = {};
   header[0] = 'B';
@@ -130,8 +139,8 @@ bool Display::writeBmp(const char* path) const {
   put32(&header[2], 54 + imageBytes);
   put32(&header[10], 54);  // pixels start here
   put32(&header[14], 40);  // DIB header size
-  put32(&header[18], static_cast<uint32_t>(width_));
-  put32(&header[22], static_cast<uint32_t>(height_));
+  put32(&header[18], static_cast<uint32_t>(width));
+  put32(&header[22], static_cast<uint32_t>(height));
   header[26] = 1;   // planes
   header[28] = 24;  // bits per pixel
   put32(&header[34], imageBytes);
@@ -143,12 +152,13 @@ bool Display::writeBmp(const char* path) const {
 
   // Bottom-up, and BGR rather than RGB: both are the format's, not ours.
   std::vector<uint8_t> row(rowBytes, 0);
-  for (int y = height_ - 1; ok && y >= 0; --y) {
+  for (int y = top + height - 1; ok && y >= top; --y) {
     const uint8_t* in = &pixels_[static_cast<size_t>(y) * static_cast<size_t>(width_) * 3];
-    for (int x = 0; x < width_; ++x) {
-      row[x * 3 + 0] = in[x * 3 + 2];
-      row[x * 3 + 1] = in[x * 3 + 1];
-      row[x * 3 + 2] = in[x * 3 + 0];
+    for (int x = 0; x < width; ++x) {
+      const uint8_t* pixel = &in[(left + x) * 3];
+      row[x * 3 + 0] = pixel[2];
+      row[x * 3 + 1] = pixel[1];
+      row[x * 3 + 2] = pixel[0];
     }
     ok = std::fwrite(row.data(), row.size(), 1, file) == 1;
   }

@@ -1,7 +1,7 @@
 // A C++ application that runs xpui screens.
 //
 // The whole point of this file is that everything below it has been compiled,
-// linked and executed: `xpui_fui.cpp` is 843 lines that a firmware is supposed
+// linked and executed: `xpui_fui.cpp` is 882 lines that a firmware is supposed
 // to add to its build, and until this example existed nothing had ever run
 // them. `--selftest` and the `--expect-*` flags turn that into a pass or a
 // fail — never a regex over the summary line, because ctest ignores a test's
@@ -41,6 +41,10 @@ struct Options {
   // Whether to install the present hook, or fall through to the weak symbol
   // this binary overrides. See `Display::attach`.
   bool useHook = true;
+  // Answer "no Left/Right pair" to the framework, as a badge-style board does.
+  // The keyboard has arrow keys, so without this no run can reach the mode a
+  // value control opens on Confirm.
+  bool noPair = false;
   int width = 480;
   int height = 800;
   int scale = 1;
@@ -48,6 +52,9 @@ struct Options {
   // CI job waiting for a window nobody will close.
   long frames = -1;
   const char* out = nullptr;
+  // What `--out` writes, when only a band of the panel is wanted. All zero is
+  // the whole panel.
+  Display::Rect crop{0, 0, 0, 0};
   // One tap per frame, in order. `kHomeGesture` for the gesture.
   std::vector<uint8_t> keys;
 
@@ -76,6 +83,7 @@ void usage() {
                "                      (back confirm left right up down\n"
                "                       pageback pageforward home)\n"
                "  --out PATH          write the last frame as a BMP\n"
+               "  --crop X,Y,W,H      write only that band of it\n"
                "  --selftest          exit non-zero unless the frame drew\n"
                "  --expect-depth N    exit non-zero unless N screens are left\n"
                "  --expect-max-depth N   ... unless the stack ever reached N\n"
@@ -85,7 +93,8 @@ void usage() {
                "  --size WxH          panel size, default 480x800\n"
                "  --scale N           window pixels per panel pixel\n"
                "  --weak-present      push frames through the weak symbol\n"
-               "                      instead of the xpui_fui_set_present hook\n",
+               "                      instead of the xpui_fui_set_present hook\n"
+               "  --no-pair           answer that this device has no Left/Right keys\n",
                kHeadlessDefaultFrames);
 }
 
@@ -95,6 +104,11 @@ bool parseSize(const char* text, Options& options) {
   options.width = atoi(text);
   options.height = atoi(cross + 1);
   return options.width > 0 && options.height > 0;
+}
+
+bool parseCrop(const char* text, Options& options) {
+  return std::sscanf(text, "%d,%d,%d,%d", &options.crop.x, &options.crop.y, &options.crop.width,
+                     &options.crop.height) == 4;
 }
 
 bool parseKeys(char* text, Options& options) {
@@ -138,6 +152,8 @@ bool parse(const int argc, char** argv, Options& options) {
       options.selftest = true;
     } else if (strcmp(arg, "--weak-present") == 0) {
       options.useHook = false;
+    } else if (strcmp(arg, "--no-pair") == 0) {
+      options.noPair = true;
     } else if (strcmp(arg, "--frames") == 0 && hasValue) {
       options.frames = atol(argv[++index]);
     } else if (strcmp(arg, "--expect-depth") == 0 && hasValue) {
@@ -152,6 +168,8 @@ bool parse(const int argc, char** argv, Options& options) {
       options.scale = atoi(argv[++index]);
     } else if (strcmp(arg, "--out") == 0 && hasValue) {
       options.out = argv[++index];
+    } else if (strcmp(arg, "--crop") == 0 && hasValue) {
+      if (!parseCrop(argv[++index], options)) return false;
     } else if (strcmp(arg, "--size") == 0 && hasValue) {
       if (!parseSize(argv[++index], options)) return false;
     } else if (strcmp(arg, "--keys") == 0 && hasValue) {
@@ -241,6 +259,7 @@ int main(int argc, char** argv) {
 
   // Order matters and nothing checks it: `attach` tells the shim where the
   // panel is, `xpui_app_install` tells the framework where the shim is.
+  xpui_host::setHasLeftRightKeys(!options.noPair);
   display.attach(options.useHook);
   xpui_app_install();
 
@@ -314,7 +333,7 @@ int main(int argc, char** argv) {
     if (!options.headless && running) SDL_Delay(16);
   }
 
-  if (options.out && !display.writeBmp(options.out)) {
+  if (options.out && !display.writeBmp(options.out, options.crop)) {
     std::fprintf(stderr, "could not write %s\n", options.out);
     return 1;
   }

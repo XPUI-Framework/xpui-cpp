@@ -43,18 +43,20 @@ impl Platform for HostPlatform {
         raw::xpui_host_was_released(Self::tag(button)) != 0
     }
 
-    /// True for the desktop host: `Input.cpp` maps `SDLK_LEFT` and `SDLK_RIGHT`
-    /// onto them, so a value control nudges here as it does on a reader.
+    /// **Asked of the host, because only the host knows.**
     ///
-    /// **This platform has a second consumer**, and they do not agree.
-    /// `examples/firmware` links this same `xpui-cpp-host` package for two
-    /// ESP32 boards — an X3, which does carry the pair, and a Seeed Sticky,
-    /// which does not. A constant is right for the keyboard and for the X3 and
-    /// wrong for the Sticky; nothing reads the answer yet, so nothing is broken,
-    /// and the fix when something does is to ask the host which board it is on
-    /// rather than to pick a better constant.
+    /// This platform has more than one consumer and they do not agree: the
+    /// desktop binary has a keyboard, whose arrow keys `Input.cpp` maps onto
+    /// the pair, while `examples/firmware` links this same package for an X3,
+    /// which carries the pair, and a Seeed Sticky, which does not. A constant
+    /// here is right for two of the three.
+    ///
+    /// It stopped being harmless when something began reading it: a device
+    /// without the pair opens a value control on Confirm and gives four keys a
+    /// second meaning while it is open, so a wrong answer is a mode that never
+    /// opens or one that opens where it should not.
     fn has_left_right_keys(&self) -> bool {
-        true
+        raw::xpui_host_has_left_right_keys() != 0
     }
 
     fn was_home_gesture(&self) -> bool {

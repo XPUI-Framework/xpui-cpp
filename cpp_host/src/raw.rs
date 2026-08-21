@@ -28,6 +28,8 @@ unsafe extern "C" {
     /// The system-level "go home" gesture, offered to the screen before the
     /// host applies its own meaning.
     pub safe fn xpui_host_was_home_gesture() -> u8;
+    /// Whether this device has a Left/Right pair; see `cpp/xpui_host.h`.
+    pub safe fn xpui_host_has_left_right_keys() -> u8;
     /// Milliseconds since the host started. The only clock this side has, and
     /// the framework needs it for key auto-repeat.
     pub safe fn xpui_host_millis() -> u32;

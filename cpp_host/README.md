@@ -5,7 +5,7 @@ happens in `cargo run -p xpui-gallery`, where an iteration costs a Rust rebuild
 rather than a CMake one. Everything here is kept as small as it can be while
 still being a real application.
 
-Until this example existed, `crates/backend/fui/cpp/xpui_fui.cpp` — 843 lines
+Until this example existed, `crates/backend/fui/cpp/xpui_fui.cpp` — 882 lines
 that a firmware is told to add to its build — had never been compiled to an
 object, never linked, and never run. Only syntax-checked. This is the thing
 that runs it.
@@ -116,7 +116,7 @@ Each is documented at its site so it is not "fixed" back:
 
 ## What proves it
 
-Six `ctest` cases, all headless. **Every assertion is an exit code**, never a
+Eight `ctest` cases, all headless. **Every assertion is an exit code**, never a
 pattern matched against the summary line: ctest ignores a test's exit status
 entirely once `PASS_REGULAR_EXPRESSION` is set, so a run whose `--selftest`
 printed a failure and exited 1 was still reported as passing. That mistake was
@@ -144,8 +144,19 @@ The cases:
 | `back_pops_to_the_root` | the pop half of the same thing; a stack that never pushed and one that never popped are each half right |
 | `draws_an_overlay` | the scrim — the call that rots quietly, because only an overlay reaches it |
 | `a_plain_screen_is_mostly_paper` | an **inverted panel**. Flip the framebuffer's polarity and every other case still passes |
+| `a_focused_value_control_differs_from_an_idle_one` | a `Chrome::draw_slider` that ignores the state it is handed |
+| `an_open_value_control_differs_from_a_focused_one` | the two states drawn *identically* — which is what "paper over paper" did here, and what an ink percentage cannot see |
 
-The last two are a pair on purpose. `--expect-ink` asserts a *relationship* —
+The last two run the binary twice and fail unless the two frames differ,
+because that is the only shape the question fits: a state you cannot see is a
+refresh spent saying nothing, and an outline is too little ink to move a
+percentage. They compare a **crop** of the control band rather than the whole
+panel — the hint bar changes whenever the keys change meaning, so two whole
+frames always differ somewhere and a full-frame comparison would pass without
+ever looking at the control. They also pass `--no-pair`, since a keyboard has
+arrow keys and the framework never opens an edit where the pair exists.
+
+`draws_an_overlay` and `a_plain_screen_is_mostly_paper` are a pair on purpose. `--expect-ink` asserts a *relationship* —
 a scrim is ink on one checkerboard parity of everything behind the dialog, so
 the panel goes from a few percent ink to about half — and it is bounded on both
 sides, because a dialog whose body never paints leaves the scrim covering what

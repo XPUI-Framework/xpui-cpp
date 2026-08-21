@@ -10,6 +10,12 @@ namespace xpui_host {
 
 Input* g_input = nullptr;
 
+// True unless a run says otherwise: the keyboard has arrow keys, and so does
+// every board this binary is built for but one.
+bool g_hasLeftRightKeys = true;
+
+void setHasLeftRightKeys(const bool present) { g_hasLeftRightKeys = present; }
+
 }  // namespace xpui_host
 
 using xpui_host::g_input;
@@ -23,6 +29,8 @@ uint8_t xpui_host_is_pressed(const uint8_t button) { return g_input && g_input->
 uint8_t xpui_host_was_released(const uint8_t button) { return g_input && g_input->wasReleased(button) ? 1 : 0; }
 
 uint8_t xpui_host_was_home_gesture(void) { return g_input && g_input->wasHomeGesture() ? 1 : 0; }
+
+uint8_t xpui_host_has_left_right_keys(void) { return xpui_host::g_hasLeftRightKeys ? 1 : 0; }
 
 // `steady_clock` rather than `SDL_GetTicks`, so a headless run needs no SDL
 // subsystem initialised — which is the whole point of headless.
