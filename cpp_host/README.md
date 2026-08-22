@@ -42,7 +42,7 @@ header:
 `ffi_symbols_agree()` in `build-and-test.sh` fails when any of those pairs
 stops agreeing about *names*. It cannot see types — two parameters swapped
 still links, and still corrupts the call frame — which is what
-[spec 07](../../docs/specs/07-ffi-checker.md) is for.
+[spec 07](../../docs/specs/done/07-ffi-checker.md) is for.
 
 ## What this was modelled on
 
@@ -82,7 +82,7 @@ that firmware wrote its own backend against its own renderer, and this example
 uses the one in this repository. Its `runtime.rs` — the global allocator and
 the panic handler — has none either, because those are `no_std` device
 concerns and belong with
-[spec 17](../../docs/specs/17-platformio-example.md).
+[spec 17](../../docs/specs/done/17-platformio-example.md).
 
 ## Three differences from the firmware, on purpose
 
