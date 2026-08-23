@@ -32,6 +32,13 @@ test = false
 # fenced `text` with the reason stated where they are written.
 doctest = false
 
+# `xpui/testing` installs the deterministic fake host, so the tutorial's
+# "prove it without a device" snippets run as doctests. A dev dependency
+# because resolver v3 keeps its features out of a normal build — the staticlib
+# a firmware links must never be compiled with a fake anything.
+[dev-dependencies]
+xpui = { workspace = true, features = ["testing"] }
+
 [dependencies]
 xpui.workspace = true
 # The backend. **Never with `testing`**: that feature swaps every C symbol for
