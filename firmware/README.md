@@ -70,9 +70,10 @@ block" is the figure that actually decides whether the next allocation fails.
 
 ## There is no panel driver
 
-Same as [`examples/esp32`](../esp32/), and for the same reason: no published
-driver exists for these panels that this repository can test. `flush()` in
-`main.cpp` counts the ink and logs it, which is where a driver goes.
+`flush()` in `main.cpp` counts the ink and logs it, which is where a driver
+goes — the C++ side of the same seam
+[`examples/esp32`](../esp32/) marks in Rust. Why there is none is
+[`docs/devices.md`](../../docs/devices.md#the-panel-drivers).
 
 ## Kept in step by hand
 
