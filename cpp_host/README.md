@@ -173,9 +173,8 @@ hook is what a firmware should copy — whether an override beats a weak
 definition is the linker's business and the failure is silent — and the flag
 exists so that path is proven here rather than assumed.
 
-**What none of this covers**: the window, as a person sees it. The loop is
-tested headlessly; that is not the same thing. Run `./target/cpp_host/xpui-host`
-and drive it.
+**To see it rather than test it**, build and run the binary:
+`./target/cpp_host/xpui-host`, with the keys listed at the top of this page.
 
 ## A note on the code blocks
 
