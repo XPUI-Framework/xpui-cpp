@@ -1,5 +1,8 @@
 # A C++ host
 
+> ⚠️ **Under heavy development.** Not production-ready. The API can break
+> without notice. Use at your own risk.
+
 **This exists to prove the C ABI, not to develop screens in.** Screen work
 happens in `cargo run -p xpui-gallery`, where an iteration costs a Rust rebuild
 rather than a CMake one. Everything here is kept as small as it can be while

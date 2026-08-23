@@ -1,5 +1,8 @@
 # An ESP32 firmware, built by PlatformIO
 
+> ⚠️ **Under heavy development.** Not production-ready. The API can break
+> without notice. Use at your own risk.
+
 `examples/cpp_host` proves the C ABI on a desktop, with CMake. This proves the
 thing a firmware author actually has to do: get Rust compiled by PlatformIO,
 linked into an ESP32 image, and running beside the C++ that was already there.
