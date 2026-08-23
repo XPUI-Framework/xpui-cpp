@@ -64,6 +64,10 @@ Nothing depends on this repository. It is the far end.
 ./build-and-test.sh all      # plus cmake, the link, and nine ctest cases
 ```
 
+The checks themselves are in [`xtask/`](xtask/) — this repository's own list,
+in Rust, holding nothing it does not run. `./build-and-test.sh fix` formats
+in place first.
+
 `all` builds the host with CMake, links the Rust archive into it and runs nine
 `ctest` cases — the only place in the organisation where the C ABI is compiled,
 linked and *executed* rather than syntax-checked.

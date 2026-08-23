@@ -35,3 +35,7 @@ source = "git+https://github.com/XPUI-Framework/xpui-backends?branch=main#1d9d72
 dependencies = [
  "xpui",
 ]
+
+[[package]]
+name = "xtask"
+version = "0.1.0"

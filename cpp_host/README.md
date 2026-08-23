@@ -42,7 +42,7 @@ header:
 | `cpp/xpui_host.h` | input, i18n, device, heap, navigation | `cpp/host_*.cpp` | Rust |
 | `cpp/xpui_app.h` | install, and the root screen's factory | `src/lib.rs` | C++ |
 
-`ffi_symbols_agree()` in `build-and-test.sh` fails when any of those pairs
+`symbols_agree` in `../xtask/src/boundary.rs` fails when any of those pairs
 stops agreeing about *names*. It cannot see types — two parameters swapped
 still links, and still corrupts the call frame — which is what
 the signature checker in [`abi/`](../abi/) is for.

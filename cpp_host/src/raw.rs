@@ -3,7 +3,7 @@
 //! The mirror of [`xpui_fui::raw`]: that declares what the *backend* asks a
 //! host to draw, this declares what the *application* asks a host to answer.
 //! Each symbol here is defined in `cpp/xpui_host.h` and one of the
-//! `cpp/host_*.cpp` files, and `ffi_symbols_agree()` in `build-and-test.sh`
+//! `cpp/host_*.cpp` files, and `symbols_agree` in the gate's `xtask/`
 //! fails the gate when the two lists drift apart.
 //!
 //! Nothing outside this crate should call these directly — the sibling modules

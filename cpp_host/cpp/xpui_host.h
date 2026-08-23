@@ -4,7 +4,7 @@
 // asks a host to draw; this is what the *application* asks a host to know —
 // which button moved, what a string means in the user's language, what device
 // this is, and where the screen stack is. Rust declares exactly these symbols
-// in `src/raw.rs`, and `ffi_symbols_agree()` in `build-and-test.sh` fails when
+// in `src/raw.rs`, and `symbols_agree` in the gate's `xtask/` fails when
 // the two lists drift apart.
 //
 // Strings cross as NUL-terminated `const uint8_t*` rather than `const char*`,

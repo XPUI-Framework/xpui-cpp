@@ -24,7 +24,7 @@ name, which is why a string and not a file.
 ## What it catches that a link does not
 
 C has no mangling, so two swapped parameters resolve perfectly and corrupt the
-call frame. `ffi_symbols_agree` in `../build-and-test.sh` compares which
+call frame. `symbols_agree` in `../xtask/src/boundary.rs` compares which
 symbols *exist*; this compares what they *are*. Neither subsumes the other, and
 a symbol wrong in the second way is a rendering fault somewhere unrelated.
 

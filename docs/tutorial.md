@@ -762,5 +762,5 @@ Two checks stand behind that, and they are worth copying if you fork this:
   and [`abi/tests/abi.rs`](../abi/tests/abi.rs) parse each header and the Rust
   beside it and compare **signatures**, across five boundaries between them. An
   unrecognised C type fails the run rather than being skipped.
-- `ffi_symbols_agree` in each repository's `build-and-test.sh` covers the half
+- `symbols_agree` in each repository's `xtask/` covers the half
   those cannot read: a header against the C++ that defines it.

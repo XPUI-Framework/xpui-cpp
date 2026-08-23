@@ -9,7 +9,10 @@
 # header that declares it. The other three are `xpui-fui`'s and live with it —
 # a repository checks the boundary it owns.
 [workspace]
-members = ["abi", "cpp_host"]
+# `xtask` is the gate. A member rather than a separate workspace so one
+# `cargo test` reaches its tests, and so the size ratchet counts its source
+# like any other.
+members = ["abi", "cpp_host", "xtask"]
 resolver = "3"
 
 [workspace.package]
