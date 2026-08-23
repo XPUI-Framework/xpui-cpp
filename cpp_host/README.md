@@ -80,7 +80,7 @@ compared.
 | `xpui-fui`'s `src/lifecycle.rs` | `lib/backend_rs/src/lifecycle.rs` |
 
 CrossPoint's `renderer.rs`, `theme.rs`, `font.rs`, `icon.rs` and `cells.rs`
-have no counterpart because `crates/backend/fui` **is** their counterpart:
+have no counterpart because `xpui-fui` **is** their counterpart:
 that firmware wrote its own backend against its own renderer, and this example
 uses the one in this repository. Its `runtime.rs` — the global allocator and
 the panic handler — has none either, because those are `no_std` device
@@ -119,7 +119,7 @@ Each is documented at its site so it is not "fixed" back:
 
 ## What proves it
 
-Eight `ctest` cases, all headless. **Every assertion is an exit code**, never a
+Nine `ctest` cases, all headless. **Every assertion is an exit code**, never a
 pattern matched against the summary line: ctest ignores a test's exit status
 entirely once `PASS_REGULAR_EXPRESSION` is set, so a run whose `--selftest`
 printed a failure and exited 1 was still reported as passing. That mistake was
@@ -142,6 +142,7 @@ The cases:
 | Test | What would otherwise go unnoticed |
 |---|---|
 | `selftest` | the three above |
+| `the_string_table_keeps_its_contract` | an unknown key coming back as anything other than the caller's own pointer. Every screen here looks up a key that is in the table, so no rendered frame reaches that branch — and the Rust side hands its result out as a `&'static str` |
 | `selftest_weak_present` | the weak-symbol override losing to the shim's own no-op — a panel that never updates, with nothing to point at |
 | `navigates_into_rust` | `Navigator::present` crossing the FFI: a screen leaves Rust as an opaque handle and arrives on the C++ stack |
 | `back_pops_to_the_root` | the pop half of the same thing; a stack that never pushed and one that never popped are each half right |
