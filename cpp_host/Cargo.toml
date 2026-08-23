@@ -26,11 +26,20 @@ crate-type = ["staticlib", "rlib"]
 # draws, and that is `xpui-host --selftest`, run by ctest.
 test = false
 
-# Off for the same reason, and it has to be said separately: `test = false`
-# turns off the unit-test harness but not doctests, and a doctest is a binary
-# that links this crate like any other. So the examples in these modules are
-# fenced `text` with the reason stated where they are written.
-doctest = false
+# Doctests are **on**, and that is a change from when this crate had none.
+#
+# `docs/tutorial.md` is nine Rust snippets and `src/lib.rs` pulls it in, so the
+# tutorial is compiled on every run. They link because none of them calls
+# across the FFI: a doctest is a binary that links this crate like any other,
+# and nothing links the C++ half into it, so a snippet reaching `strings::tr`
+# or `device::name` would fail at the link rather than the compile. That is why
+# those modules' own examples are fenced `text` and say so where they are
+# written, and why the tutorial's snippets stand up their own stand-ins.
+#
+# It was `doctest = false` and the tutorial ran anyway, because `--doc` on the
+# command line overrides the manifest key. Nine snippets checked by a flag
+# precedence nobody chose is nine snippets one cargo release away from silently
+# not being checked at all.
 
 # `xpui/testing` installs the deterministic fake host, so the tutorial's
 # "prove it without a device" snippets run as doctests. A dev dependency

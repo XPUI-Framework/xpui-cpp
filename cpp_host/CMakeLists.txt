@@ -183,6 +183,12 @@ enable_testing()
 add_test(NAME selftest COMMAND xpui-host --headless --frames 30 --selftest
                                --out "${CMAKE_CURRENT_BINARY_DIR}/frame.bmp")
 
+# The string table's contract, which no rendered frame reaches: every screen
+# here looks up a key that is in the table, so the branch that returns the
+# caller's own pointer for a missing one was never executed by any test. It is
+# the branch the Rust side's `&'static CStr` bound exists for.
+add_test(NAME the_string_table_keeps_its_contract COMMAND xpui-host --check-i18n)
+
 # The same run, pushed through the weak `xpui_fui_present` instead of the hook.
 # Whether an override beats a weak definition is the linker's business and
 # differs by object format; this is the only thing that proves it here.

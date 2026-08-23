@@ -38,6 +38,8 @@ using xpui_host::ScreenStack;
 struct Options {
   bool headless = false;
   bool selftest = false;
+  // Check the string table's contract and exit, without opening anything.
+  bool checkI18n = false;
   // Whether to install the present hook, or fall through to the weak symbol
   // this binary overrides. See `Display::attach`.
   bool useHook = true;
@@ -85,6 +87,7 @@ void usage() {
                "  --out PATH          write the last frame as a BMP\n"
                "  --crop X,Y,W,H      write only that band of it\n"
                "  --selftest          exit non-zero unless the frame drew\n"
+               "  --check-i18n        check xpui_host_tr's contract and exit\n"
                "  --expect-depth N    exit non-zero unless N screens are left\n"
                "  --expect-max-depth N   ... unless the stack ever reached N\n"
                "  --expect-ink N      ... unless at least N%% of the panel is\n"
@@ -150,6 +153,8 @@ bool parse(const int argc, char** argv, Options& options) {
       options.headless = true;
     } else if (strcmp(arg, "--selftest") == 0) {
       options.selftest = true;
+    } else if (strcmp(arg, "--check-i18n") == 0) {
+      options.checkI18n = true;
     } else if (strcmp(arg, "--weak-present") == 0) {
       options.useHook = false;
     } else if (strcmp(arg, "--no-pair") == 0) {
@@ -191,6 +196,50 @@ void report(const Options& options, const Display& display, const ScreenStack& s
   std::printf("xpui-host: frames=%ld presents=%u blits=%u depth=%zu maxdepth=%zu mixed=%d ink=%d%% present=%s\n",
               frames, Display::presentsRequested(), display.framesBlitted(), stack.depth(), stack.maxDepth(),
               display.isMixed() ? 1 : 0, display.inkPercent(), options.useHook ? "hook" : "weak");
+}
+
+// What `xpui_host_tr` promises, checked.
+//
+// Two halves, and the second is a **soundness** requirement rather than a
+// nicety. A key that is in the table comes back as a pointer into the table.
+// A key that is not comes back as *the caller's own pointer* — which is how a
+// missing string shows up on the panel as the key itself instead of a blank
+// row, and which is why the Rust side takes `&'static CStr` and can hand the
+// result back as a `&'static str`. Return a copy, or `""`, and that bound
+// stops being justified while everything still compiles and still draws.
+//
+// Nothing else here exercises a missing key: the one runtime caller looks up
+// STR_MENU_TITLE, which is in the table.
+int checkI18n() {
+  int failures = 0;
+
+  const auto* known = reinterpret_cast<const uint8_t*>("STR_MENU_TITLE");
+  const uint8_t* found = xpui_host_tr(known);
+  if (found == known) {
+    std::fprintf(stderr, "check-i18n: a key that is in the table came back as itself\n");
+    ++failures;
+  } else if (strcmp(reinterpret_cast<const char*>(found), "xpui on a C++ host") != 0) {
+    std::fprintf(stderr, "check-i18n: STR_MENU_TITLE resolved to \"%s\"\n", reinterpret_cast<const char*>(found));
+    ++failures;
+  }
+
+  const auto* missing = reinterpret_cast<const uint8_t*>("STR_NOT_IN_THE_TABLE");
+  if (xpui_host_tr(missing) != missing) {
+    std::fprintf(stderr,
+                 "check-i18n: an unknown key did not come back as the caller's own\n"
+                 "            pointer. Rust hands that result out as a &'static str.\n");
+    ++failures;
+  }
+
+  if (xpui_host_tr(nullptr) == nullptr) {
+    std::fprintf(stderr, "check-i18n: a null key came back null rather than empty\n");
+    ++failures;
+  }
+
+  if (failures == 0) {
+    std::printf("check-i18n: the table's contract holds\n");
+  }
+  return failures == 0 ? 0 : 1;
 }
 
 // The three things that have to be true, or the C ABI is not working.
@@ -250,6 +299,11 @@ int main(int argc, char** argv) {
   if (!parse(argc, argv, options)) {
     usage();
     return 2;
+  }
+
+  // Before any window, any framebuffer and any screen: it needs none of them.
+  if (options.checkI18n) {
+    return checkI18n();
   }
 
   Display display(options.width, options.height);

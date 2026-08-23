@@ -77,7 +77,7 @@ compared.
 | `src/strings.rs` | `lib/backend_rs/src/i18n.rs` |
 | `src/device.rs` | `lib/backend_rs/src/device.rs` |
 | `src/screens/` | `lib/crosspoint_rs/src/activities/` |
-| `crates/backend/fui/src/lifecycle.rs` | `lib/backend_rs/src/lifecycle.rs` |
+| `xpui-fui`'s `src/lifecycle.rs` | `lib/backend_rs/src/lifecycle.rs` |
 
 CrossPoint's `renderer.rs`, `theme.rs`, `font.rs`, `icon.rs` and `cells.rs`
 have no counterpart because `crates/backend/fui` **is** their counterpart:

@@ -3,10 +3,12 @@
 You have a C++ firmware. You want to write its next screen in Rust, without
 rewriting the firmware and without the two halves drifting apart.
 
-This walks the whole boundary once. Every Rust block below is compiled by
-`cargo test`, and every C++ block is compiled by `./build-and-test.sh` — so a
-snippet that stops being true fails the build rather than quietly misleading
-whoever reads it next.
+This walks the whole boundary once. Every block below is compiled by
+`./build-and-test.sh` — the Rust ones as doctests, the C++ ones each as its own
+translation unit — so a snippet that stops being true fails the build rather
+than quietly misleading whoever reads it next.
+
+`cargo test --workspace` runs the Rust half by hand.
 
 The finished thing is [`cpp_host`](../cpp_host), which runs in a window, and
 [`firmware`](../firmware), which is the same code in an ESP32 image. Read
@@ -365,8 +367,9 @@ uint32_t xpui_host_millis(void) {
 ## 7. Teach the firmware something new
 
 Sooner or later a screen wants something no header offers — the uptime, the
-Wi-Fi state, the page count. That is **four edits**, always the same four, and
-missing one is the most common mistake at this boundary.
+Wi-Fi state, the page count. That is **three edits, and a fourth if you want to
+test on a laptop**. Missing the fourth is the most common mistake at this
+boundary, and the one that fails days later.
 
 Say the screen wants to show how long the device has been awake.
 
@@ -405,8 +408,9 @@ signature for you at this point** — a swapped parameter or a narrowed
 `int32_t` links perfectly, because C has no mangling to disagree with, and
 corrupts the call frame instead.
 
-**7d. Give the host tests something to link against.** This is the step people
-forget, and it is the one that fails days later:
+**7d. Give your tests something to link against**, if your crate has tests.
+`cargo test` runs on a laptop, where the firmware does not exist, so the symbol
+is missing and the test binary does not link at all:
 
 ```rust
 /// Stands in for the firmware, so a test binary links on a laptop.
@@ -423,12 +427,14 @@ unsafe — nothing checks that the C++ side declares it the same way — and Rus
 Then wrap it once, so no screen ever writes `unsafe`:
 
 ```rust
-mod raw {
-    pub unsafe fn xpui_host_uptime_seconds() -> i32 {
-        4_321
-    }
-}
-
+# // Stands in for 7c's `unsafe extern "C"` block, so this snippet links with
+# // no firmware behind it. In your crate `raw` is that block, and the call
+# // below is genuinely unsafe; here it is a constant wearing the shape.
+# mod raw {
+#     pub unsafe fn xpui_host_uptime_seconds() -> i32 {
+#         4_321
+#     }
+# }
 /// Seconds since the device booted.
 pub fn uptime_seconds() -> i32 {
     // Safety: an integer in, an integer out; the host promises no more.
@@ -439,11 +445,21 @@ assert_eq!(uptime_seconds(), 4_321);
 ```
 
 **The double is the one that rots quietly**, because nothing calls it in a
-firmware build. A missing `cpp_scrim` sat unnoticed in a sibling firmware until
-a test finally exercised an overlay. `xpui-fui` keeps its doubles in
-`src/testing/stubs.rs` behind a `testing` feature, and the same feature is
-**never** on in a staticlib you ship: it swaps every drawing symbol for a
-recorder, so the archive links cleanly into your C++ and draws nothing at all.
+firmware build. A missing `cpp_scrim` sat unnoticed in a firmware until a test
+finally exercised an overlay.
+
+Two things about where it goes. `xpui-fui` keeps *its* doubles — for the
+drawing symbols, not these — in `src/testing/stubs.rs` behind a `testing`
+feature, and that feature is **never** on in a staticlib you ship: it swaps 28
+of the 30 drawing symbols for a recorder, so the archive links cleanly into
+your C++ and draws nothing at all.
+
+And **`cpp_host` deliberately has no `xpui_host_*` doubles**, which is why 7d
+names no file in this repository. Its `Cargo.toml` says why: every wrapper here
+is one `unsafe` call and nothing else, so a test binary would be testing a
+double against a wrapper with no logic in it — a fourth place for the ABI to
+rot, proving nothing. Your crate is different the moment a screen has state
+worth asserting on, and then 7d is where the double goes.
 
 ---
 
@@ -545,6 +561,13 @@ assert_eq!(screen.level, 75);
 
 // And what a backend would be asked to paint. The fake host records every
 // call, so this asserts the slider is drawn where the level says.
+//
+// `install` is explicit rather than required: a build with `xpui/testing` on
+// installs the fake the first time anything asks for a host, so deleting this
+// line changes nothing here. In a crate without that feature it is the
+// difference between a test and a panic. `reset` is not optional — the call
+// log is process-wide, and a test that does not clear it reads the previous
+// one's frame.
 testing::install();
 testing::reset();
 xpui::App::new(Brightness { level: 75 }).render();
@@ -584,12 +607,13 @@ Plug the device in over USB-C. **Find out which chip it is first**, because
 the firmware differs and the wrong image simply will not boot:
 
 ```bash
-esptool --port /dev/cu.usbmodem2101 chip_id
+esptool --port /dev/cu.usbmodem2101 chip-id
 ```
 
-If `esptool` is not on your path, PlatformIO ships one:
-`~/.platformio/packages/tool-esptoolpy/esptool.py`, run with
-`~/.platformio/penv/bin/python`.
+If `esptool` is not on your path, PlatformIO ships one under
+`~/.platformio/packages/tool-esptoolpy/`. Its subcommands were spelled with
+underscores before esptool 5 — `chip_id`, `read_flash` — and still work, with a
+deprecation warning naming the hyphenated form.
 
 Read the `Chip type` line and pick the environment that matches:
 
@@ -599,13 +623,15 @@ Read the `Chip type` line and pick the environment that matches:
 | ESP32-S3 | Seeed Sticky | `sticky` |
 
 There is a third, `simulator_x3`, which builds the same code as a window on
-this machine and flashes nothing. All three compile;
-[`firmware/README.md`](../firmware/README.md) is the one that keeps that
-current.
+this machine and flashes nothing.
+[`firmware/README.md`](../firmware/README.md) records what each one produces —
+and it is the page to trust on that, since this section is under a warning that
+nothing here is checked.
 
 Then build, flash, and watch it come up.
 [`firmware/README.md`](../firmware/README.md) has the build commands and the
-one PlatformIO trap worth knowing; flashing adds two flags to them:
+one PlatformIO trap worth knowing; flashing adds `-t upload` to them, and then
+a second command to read the serial port:
 
 ```bash
 pio run -e <environment> -t upload
@@ -619,11 +645,18 @@ the environment's MCU. There is no separate Rust step and no order to remember.
 **You cannot brick it this way.** The first-stage bootloader lives in mask ROM
 and cannot be overwritten, so the worst case is a device that does not boot:
 hold **BOOT**, tap **RESET**, and flash again. If you want a restore point
-before you start, take one first:
+before you start, take one first — **and read the size off the chip rather than
+copying one**, because the two boards do not have the same flash:
 
 ```bash
-esptool --port /dev/cu.usbmodem2101 read_flash 0x0 0x1000000 backup.bin
+esptool --port /dev/cu.usbmodem2101 flash-id      # prints "Detected flash size"
+esptool --port /dev/cu.usbmodem2101 read-flash 0x0 ALL backup.bin
 ```
+
+`ALL` reads whatever is there. Spelled out, the `default` environment's
+`esp32-c3-devkitm-1` is 4 MB (`0x400000`) and `sticky`'s
+`esp32-s3-devkitc1-n16r8` is 16 MB (`0x1000000`) — a number pasted from the
+wrong board reads past the end or leaves most of it out.
 
 If the build fails, read the **first** error rather than the last. Rust errors
 cascade, and the twentieth is usually a consequence of the first.
@@ -676,18 +709,24 @@ nothing about the screen.
 So the figure that matters is the heap, over a screen's lifetime:
 
 ```rust
+# #[derive(Copy, Clone)]
 # struct Reading { free: i32, largest_block: i32 }
-# fn heap() -> Reading { Reading { free: 100, largest_block: 100 } }
-let before = heap();
+# // Two readings a host actually gave, either side of a screen that leaked.
+# fn heap_on_entry() -> Reading { Reading { free: 32_768, largest_block: 20_480 } }
+# fn heap_on_exit() -> Reading { Reading { free: 32_720, largest_block: 18_944 } }
+let before = heap_on_entry();
 // ... open the screen, use it, close it ...
-let after = heap();
+let after = heap_on_exit();
 
-// A screen that does not return to its entry figure is leaking.
-assert_eq!(after.free, before.free);
+// A screen that does not return to its entry figure is leaking, and this one
+// did: forty-eight bytes that never came back.
+assert_eq!(before.free - after.free, 48);
 
-// And the gap between these two is what actually decides whether the next
-// allocation succeeds on a device with no MMU.
-assert!(after.largest_block <= after.free);
+// The gap between free and largest block is fragmentation, and on a device
+// with no MMU it is what actually decides whether the next allocation fails.
+// Plenty free and nowhere to put anything is a real failure.
+assert!(after.largest_block < after.free);
+assert_eq!(after.free - after.largest_block, 13_776);
 ```
 
 `xpui_host_heap_*` is four functions — total, free, largest block, and the

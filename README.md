@@ -14,7 +14,7 @@ six lifecycle entry points and an opaque `void*`.
 
 | | |
 |---|---|
-| [`docs/tutorial.md`](docs/tutorial.md) | **Start here.** Write a screen, export it, drive it from C++, answer what the framework asks, start it |
+| [`docs/tutorial.md`](docs/tutorial.md) | **Start here.** Eleven steps: write a screen, get its words from your string table, export it, drive it, open it from the menu you already have, answer what the framework asks, teach the firmware a new symbol, start it, build it, test it with no device, and flash it |
 | [`cpp_host`](cpp_host/) | The worked example, and the only thing any gate in this organisation builds, links and *runs* the FreeInkUI shim through. Design an ABI change here |
 | [`firmware`](firmware/) | The same C++ through PlatformIO, for a real ESP32. No gate invokes it, so a break surfaces when somebody builds a firmware |
 | [`abi`](abi/) | Two of the five ABI boundaries, checked — the two that cross into the *application*: `xpui_host.h` against the Rust that calls it, and `xpui_app.h` against the macro that defines it. The other three are the backend's and are checked there |
@@ -56,7 +56,7 @@ Nothing depends on this repository. It is the far end.
 
 ```bash
 ./build-and-test.sh          # format, lint, test, and every snippet
-./build-and-test.sh all      # plus cmake, the link, and eight ctest cases
+./build-and-test.sh all      # plus cmake, the link, and nine ctest cases
 ```
 
 **The window has never been looked at by a person.** The loop is tested

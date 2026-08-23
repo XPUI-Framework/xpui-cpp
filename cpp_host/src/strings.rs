@@ -14,9 +14,12 @@ use crate::raw;
 /// Looks up a translation.
 ///
 /// Takes a [`CStr`] so a caller can pass a `c"…"` literal and nothing is
-/// allocated: this is called from `body()`, which runs on every paint. It is
-/// fenced as `text` because a doctest here would have to link the C++ half —
-/// see the `doctest = false` note in `Cargo.toml`.
+/// allocated: this is called from `body()`, which runs on every paint.
+///
+/// Fenced as `text`, and it is the only reason this crate's examples ever are:
+/// a doctest links this crate without the C++ half, so a snippet that actually
+/// called this would fail at the link. Doctests are on — the tutorial is nine
+/// of them — and they run because none of them crosses the boundary.
 ///
 /// ```text
 /// Text::new(strings::tr(c"STR_ABOUT_TITLE"))
