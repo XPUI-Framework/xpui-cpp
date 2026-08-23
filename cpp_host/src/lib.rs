@@ -25,6 +25,17 @@
 
 #![cfg_attr(target_os = "none", no_std)]
 
+/// This repository's prose, compiled.
+///
+/// The tutorial teaches both sides of the boundary at once, so its snippets
+/// have to reach both headers: `xpui_screen.h` from the backend and
+/// `xpui_host.h` from this repository. Only here can they.
+#[cfg(doctest)]
+mod guides {
+    #[doc = include_str!("../../docs/tutorial.md")]
+    pub mod tutorial {}
+}
+
 extern crate alloc;
 
 mod device;
