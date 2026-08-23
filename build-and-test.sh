@@ -250,20 +250,17 @@ gates() {
 
 case "${1:-check}" in
   check)
-    rust_format_check
-    cpp_format_check
+    run_all "${FORMAT_CHECK[@]}"
     gates
     printf '\nChecks passed. "./build-and-test.sh all" also links and runs it.\n'
     ;;
   fix)
-    rust_format_fix
-    cpp_format_fix
+    run_all "${FORMAT_FIX[@]}"
     gates
     printf '\nFormatted and checked.\n'
     ;;
   all)
-    rust_format_check
-    cpp_format_check
+    run_all "${FORMAT_CHECK[@]}"
     gates
     cpp_host_runs
     printf '\nEverything passed.\n'
