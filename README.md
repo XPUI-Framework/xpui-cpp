@@ -17,7 +17,7 @@ six lifecycle entry points and an opaque `void*`.
 | [`docs/tutorial.md`](docs/tutorial.md) | **Start here.** Write a screen, export it, drive it from C++, answer what the framework asks, start it |
 | [`cpp_host`](cpp_host/) | The worked example, and the only thing any gate in this organisation builds, links and *runs* the FreeInkUI shim through. Design an ABI change here |
 | [`firmware`](firmware/) | The same C++ through PlatformIO, for a real ESP32. No gate invokes it, so a break surfaces when somebody builds a firmware |
-| [`abi`](abi/) | Two of the five ABI boundaries, checked: `xpui_app.h` and `xpui_screen.h` against the Rust that defines them |
+| [`abi`](abi/) | Two of the five ABI boundaries, checked — the two that cross into the *application*: `xpui_host.h` against the Rust that calls it, and `xpui_app.h` against the macro that defines it. The other three are the backend's and are checked there |
 
 ## The boundary runs both ways
 
