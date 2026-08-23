@@ -26,9 +26,24 @@ xpui = { git = "https://github.com/XPUI-Framework/xpui-framework", branch = "mai
 xpui-fui = { git = "https://github.com/XPUI-Framework/xpui-backends", branch = "main" }
 xpui-abi-check = { git = "https://github.com/XPUI-Framework/xpui-backends", branch = "main" }
 
-# Shared across every repository so host, RISC-V and Xtensa builds agree.
+# Size over speed: flash is the scarce resource, not cycles.
+#
+# This workspace is the top of two different builds, and the profile applies to
+# both. `firmware/scripts/build_rust.py` runs `cargo build --release` here for
+# a device triple, and that archive is linked into an ESP32 image where `"z"`
+# is what matters. The gate builds the same crate for the host, where it makes
+# no difference — a desktop static library nothing is short of room for.
 [profile.release]
-opt-level = "s"
+opt-level = "z"
 lto = true
 codegen-units = 1
 panic = "abort"
+
+# **No `strip`.** The monorepo's root profile set `strip = true` and both of
+# these inherited it; the extraction dropped it, and it stays dropped on
+# purpose. `xpui-rp2040` weighed the same choice and landed on
+# `strip = "debuginfo"` because probe-rs finds the RTT control block by symbol
+# and `true` deletes the table it looks in. The argument carries here: neither
+# of these boards has been run, so the first person to run one wants symbol
+# names in a backtrace more than they want a smaller file on the host. It
+# costs nothing on the part — a symbol table is in no loadable segment.

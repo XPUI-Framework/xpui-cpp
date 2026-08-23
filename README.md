@@ -61,3 +61,7 @@ Nothing depends on this repository. It is the far end.
 
 **The window has never been looked at by a person.** The loop is tested
 headlessly, which is not the same thing.
+
+## License
+
+MIT — see [LICENSE](LICENSE). Copyright (c) 2026 Thiago Holanda.

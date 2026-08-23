@@ -1,0 +1,28 @@
+# Pins the Rust toolchain for everyone, including CI.
+#
+# Without a pin, `cargo clippy -- -D warnings` breaks the moment a new stable
+# release adds a lint — on somebody else's unrelated pull request. Bumping this
+# file is then a deliberate change, reviewed like any other.
+#
+# To bump: raise `channel`, run `./build-and-test.sh`, fix whatever the new
+# clippy found, and commit the two together. Every repository in the
+# organisation carries this file with the same channel; they are bumped
+# together or they disagree about what a warning is.
+
+[toolchain]
+channel = "1.97.1"
+components = ["rustfmt", "clippy"]
+
+# **The gate is host-only; this repository is not.** `./build-and-test.sh`
+# names no bare-metal triple — what it checks is the desktop host, with CMake
+# and ctest. But `firmware/` builds the same Rust for a device through
+# PlatformIO, and `scripts/build_rust.py` picks the triple from the board's
+# MCU: `riscv32imc-unknown-none-elf` for the ESP32-C3, and Xtensa for the S3.
+#
+# The C3's triple is listed so `pio run -e default` needs no setup beyond this
+# file, which is what that script's own help text promises.
+targets = ["riscv32imc-unknown-none-elf"]
+
+# **The S3 is not, and cannot be.** Xtensa is unreachable from stable Rust: it
+# needs the `esp` fork from `espup`, and `cargo +esp` overrides this file
+# entirely. `pio run -e sticky` requires that fork installed separately.
