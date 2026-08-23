@@ -33,6 +33,19 @@ TEST_FEATURES=""
 # Host only. What runs on a device here is C++, compiled by PlatformIO.
 HOST_WORKSPACE=1
 
+# `cpp_host` has no Rust tests, and its manifest argues the case at length.
+#
+# Every `xpui_host_*` symbol it calls is defined by the C++ half, so a Rust
+# test binary could only link against doubles — a fourth place for the ABI to
+# rot, testing a wrapper that adds no logic of its own. What this crate has to
+# prove is that the whole stack links and draws, and that is `ctest`: nine
+# cases driving the built binary — three through `--selftest`, the rest through
+# navigation, an overlay, paper coverage and the string table — all run by
+# `./build-and-test.sh all`.
+UNTESTED_CRATES=(
+  "cpp_host:proved by nine ctest cases; a Rust harness could only link doubles"
+)
+
 . bin/gate-common.sh
 
 # ---------------------------------------------------------------------------
@@ -235,6 +248,7 @@ cpp_host_runs() {
 
 gates() {
   file_sizes
+  crates_are_tested
   every_check_runs
   readmes_warn
   prose_is_compiled
