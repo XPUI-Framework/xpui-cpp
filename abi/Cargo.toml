@@ -1,0 +1,26 @@
+# The two ABI boundaries this repository owns.
+#
+# A crate beside `cpp_host` rather than tests inside it, because that crate
+# sets `test = false`: every `xpui_host_*` symbol it calls is defined by the
+# C++ half, so a test harness there could link only against doubles — a fourth
+# place for the ABI to rot. This one links nothing. It reads files and compares
+# signatures.
+[package]
+name = "xpui-cpp-abi"
+description = "Checks this repository's C headers against the Rust that answers them"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+authors = ["Thiago Holanda <unnamedd@gmail.com>"]
+repository = "https://github.com/XPUI-Framework/xpui-cpp"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dev-dependencies]
+xpui-abi-check.workspace = true
+# For `LIFECYCLE_SOURCE`: the factories a C++ application exports are generated
+# by `register_screen!`, so the only place their signatures exist is that
+# macro's body, and the crate that owns it hands out its text.
+xpui-fui = { git = "https://github.com/XPUI-Framework/xpui-backends", branch = "main", features = ["testing"] }

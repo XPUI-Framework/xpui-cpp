@@ -1,6 +1,6 @@
 # The C++ host: FreeInkUI, the xpui shim, and a Rust staticlib.
 #
-#   cmake -S examples/cpp_host -B target/cpp_host -G Ninja -DCMAKE_BUILD_TYPE=Release
+#   cmake -S cpp_host -B target/cpp_host -G Ninja -DCMAKE_BUILD_TYPE=Release
 #   cmake --build target/cpp_host
 #   ctest --test-dir target/cpp_host --output-on-failure
 #
@@ -17,8 +17,25 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-get_filename_component(XPUI_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
-set(XPUI_FUI_DIR "${XPUI_ROOT}/crates/backend/fui")
+get_filename_component(XPUI_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
+
+# The shim's two headers and its 882 lines of C++ live in the backends
+# repository now. A sibling checkout by default, like the FreeInk SDK; point
+# XPUI_BACKENDS_DIR somewhere else if yours is not beside this one.
+if(NOT DEFINED XPUI_BACKENDS_DIR)
+  if(DEFINED ENV{XPUI_BACKENDS_DIR})
+    set(XPUI_BACKENDS_DIR "$ENV{XPUI_BACKENDS_DIR}")
+  else()
+    get_filename_component(XPUI_BACKENDS_DIR "${XPUI_ROOT}/../xpui-backends" ABSOLUTE)
+  endif()
+endif()
+if(NOT EXISTS "${XPUI_BACKENDS_DIR}/fui/cpp/xpui_fui.h")
+  message(FATAL_ERROR
+    "xpui-backends not found at ${XPUI_BACKENDS_DIR}. Clone it beside this "
+    "repository, or set XPUI_BACKENDS_DIR. Without it the build stops on "
+    "xpui_fui.h: No such file, which names the symptom rather than the cause.")
+endif()
+set(XPUI_FUI_DIR "${XPUI_BACKENDS_DIR}/fui")
 
 # -- FreeInkUI ----------------------------------------------------------------
 #

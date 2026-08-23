@@ -14,7 +14,7 @@ object, never linked, and never run. Only syntax-checked. This is the thing
 that runs it.
 
 ```bash
-cmake -S examples/cpp_host -B target/cpp_host -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake -S cpp_host -B target/cpp_host -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build target/cpp_host
 ctest --test-dir target/cpp_host --output-on-failure
 

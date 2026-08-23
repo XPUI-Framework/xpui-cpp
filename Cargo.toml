@@ -1,0 +1,34 @@
+# A C++ application hosting Rust screens, and the same thing as an ESP32 image.
+#
+# `cpp_host` is the worked example of the C ABI, and the only thing that
+# compiles, links and *runs* the FreeInkUI shim on a desktop. `firmware` is the
+# PlatformIO build of the same boundary for a board.
+#
+# This repository owns two of the five ABI boundaries: the host's own header
+# against the Rust that calls it, and what the application exports against the
+# header that declares it. The other three are `xpui-fui`'s and live with it —
+# a repository checks the boundary it owns.
+[workspace]
+members = ["abi", "cpp_host"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+authors = ["Thiago Holanda <unnamedd@gmail.com>"]
+repository = "https://github.com/XPUI-Framework/xpui-cpp"
+
+[workspace.dependencies]
+# Git dependencies, not versions: nothing is published, and a fresh clone of
+# this repository has to build without its siblings on disk.
+xpui = { git = "https://github.com/XPUI-Framework/xpui-framework", branch = "main" }
+xpui-fui = { git = "https://github.com/XPUI-Framework/xpui-backends", branch = "main" }
+xpui-abi-check = { git = "https://github.com/XPUI-Framework/xpui-backends", branch = "main" }
+
+# Shared across every repository so host, RISC-V and Xtensa builds agree.
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"

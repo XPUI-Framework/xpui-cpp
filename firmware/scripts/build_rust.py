@@ -37,14 +37,17 @@ BUILD_TIMEOUT_SECONDS = 900
 
 
 def workspace_root(project_dir):
-    """The cargo workspace this example is a member of.
+    """The cargo workspace this firmware builds its Rust half from.
 
-    `examples/firmware` -> the repository root. Derived rather than assumed, so
-    moving the example is one edit here and not a silent wrong path.
+    `firmware/` -> this repository's root, one level up, where the workspace
+    that holds `cpp_host` lives. Checked rather than assumed: a wrong path
+    resolves to some other directory and builds the wrong thing, which is worse
+    than not building at all.
     """
-    root = os.path.abspath(os.path.join(project_dir, "..", ".."))
-    if not os.path.exists(os.path.join(root, "Cargo.toml")):
-        raise RuntimeError("cargo workspace manifest not found at {}".format(root))
+    root = os.path.abspath(os.path.join(project_dir, ".."))
+    manifest = os.path.join(root, "Cargo.toml")
+    if not os.path.exists(manifest):
+        raise RuntimeError("cargo workspace manifest not found at {}".format(manifest))
     return root
 
 
