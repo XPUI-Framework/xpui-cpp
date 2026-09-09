@@ -59,12 +59,14 @@ unsafe extern "C" {
     /// Looks a key up in the host's string table.
     ///
     /// Returns the key itself when it is unknown, so a typo shows up on screen
-    /// rather than crashing or drawing a blank. The table is static, so the
-    /// answer is immortal in the same sense as a title.
+    /// rather than crashing or drawing a blank — so the answer is immortal
+    /// only if the key was, which `strings::tr` guarantees by its signature.
     pub fn xpui_host_tr(key: *const u8) -> *const u8;
 
     // -- device --------------------------------------------------------------
+    /// Immortal: a pointer into the host's static storage.
     pub fn xpui_host_device_name() -> *const u8;
+    /// Immortal, as above.
     pub fn xpui_host_firmware_version() -> *const u8;
     pub safe fn xpui_host_battery_percent() -> i32;
 
@@ -76,7 +78,7 @@ unsafe extern "C" {
     /// spins afterwards rather than relying on that.
     ///
     /// Declared only where it is used, or it is dead code on the host and
-    /// warnings are failures. The gate's symbol check and `tests/abi.rs` both
+    /// warnings are failures. The gate's symbol check and `abi/tests/abi.rs` both
     /// read this file as text, so the `cfg` is invisible to them and the
     /// header still has to declare it.
     #[cfg(target_os = "none")]

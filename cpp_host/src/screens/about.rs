@@ -7,7 +7,7 @@
 //!
 //! The figures are formatted **when they are read**, not in `body()`.
 //! `body()` runs on every paint and on every frame carrying input; formatting
-//! five numbers there would allocate five strings several times a second and
+//! six numbers there would allocate six strings several times a second and
 //! drag `core::fmt` onto a path that has to stay cheap.
 
 use alloc::format;
@@ -27,7 +27,7 @@ pub enum Msg {
     Refresh,
 }
 
-/// The five memory figures, already written out.
+/// The battery and the five memory figures, already written out.
 struct Figures {
     battery: String,
     total: String,
@@ -43,7 +43,6 @@ impl Figures {
         let battery = device::battery_percent();
 
         Figures {
-            // A host with no battery says so rather than claiming to be full.
             battery: if battery < 0 {
                 String::from(UNKNOWN)
             } else {

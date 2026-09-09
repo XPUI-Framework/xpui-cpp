@@ -16,14 +16,16 @@ class ScreenStack;
 
 // The screen currently running.
 //
-// Bound by `ScreenHost` at the top of every loop() and render() rather than
-// once on entry, and that is load-bearing: screens form a stack, so a screen
+// Bound by `ScreenHost` at every entry point — enter, exit, loop, render, the
+// home gesture — rather than once, and that is load-bearing: screens form a
+// stack, so a screen
 // pushed over another clears this on its way out and the stack resumes the one
 // beneath WITHOUT calling onEnter again. Bound once, the resumed screen would
 // run with a null here and its Back button would do nothing.
 extern ScreenHost* g_screen;
 
-// Bound once by main, because neither depends on which screen is running.
+// The two pointers are bound once by main, because neither depends on which
+// screen is running.
 extern Input* g_input;
 extern ScreenStack* g_stack;
 extern bool g_hasLeftRightKeys;

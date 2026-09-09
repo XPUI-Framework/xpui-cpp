@@ -1,25 +1,17 @@
 // What the host answers, and Rust asks.
 //
-// The application half of the boundary. `xpui_fui.h` is what the *backend*
-// asks a host to draw; this is what the *application* asks a host to know —
-// which button moved, what a string means in the user's language, what device
-// this is, and where the screen stack is. Rust declares exactly these symbols
-// in `src/raw.rs`, and `symbols_agree` in the gate's `xtask/` fails when
-// the two lists drift apart.
+// The application half of the boundary: `xpui_fui.h` is what the *backend*
+// asks a host to draw, this is what the *application* asks a host to know.
+// Rust declares exactly these symbols in `src/raw.rs`, and `symbols_agree`
+// in the gate fails when the two lists drift apart.
 //
 // Strings cross as NUL-terminated `const uint8_t*` rather than `const char*`,
-// because `char`'s signedness is implementation-defined and Rust's `u8` is
-// not. Every function here says what its pointers promise; there are only two
-// promises and they are worth reading:
-//
-//   * IMMORTAL — the pointer is valid for the rest of the program. Rust reads
-//     these as `&'static str`, which is a claim the compiler cannot check, so
-//     an implementation that returns a pointer into anything it will later
-//     free hands the framework a dangling reference. `intern()` exists for
-//     exactly this, and the translation table is static.
-//
-//   * BORROWED FOR THE CALL — valid until the function returns, and not after.
-//     Copy what you need.
+// because `char`'s signedness is implementation-defined. Every function says
+// what its pointers promise, and there are two promises: IMMORTAL — valid for
+// the rest of the program, read by Rust as `&'static str`, which the compiler
+// cannot check, so a pointer into anything later freed hands the framework a
+// dangling reference (`intern()` exists for this) — and BORROWED FOR THE
+// CALL — valid until the function returns; copy what you need.
 
 #pragma once
 
@@ -32,16 +24,12 @@ extern "C" {
 // -- input -------------------------------------------------------------------
 //
 // `button` is xpui::Button's own discriminant:
-//
 //   0 Back        1 Confirm      2 Left        3 Right       4 Up
 //   5 Down        6 Power        7 PageBack    8 PageForward 9 NavNext
 //  10 NavPrevious 11 ScreenLeft 12 ScreenRight 13 ScreenUp  14 ScreenDown
-//
 // Anything outside that range answers 0 rather than reading off the end of a
-// table: the enum can grow on the Rust side without this file changing.
-//
-// An edge query is true for exactly one frame and is not consumed by reading —
-// the framework asks the same question more than once per frame.
+// table. An edge query is true for exactly one frame and is not consumed by
+// reading — the framework asks the same question more than once per frame.
 
 uint8_t xpui_host_was_pressed(uint8_t button);
 uint8_t xpui_host_is_pressed(uint8_t button);
@@ -81,21 +69,20 @@ void xpui_host_screen_finish(void);
 // Pushes a screen the Rust side built, with the title to show for it.
 //
 // `screen` is an opaque handle from `xpui_fui::lifecycle::handle_for`; drive
-// it through `xpui_screen.h` and free it with `xpui_screen_destroy`.
-//
-// Returns non-zero when the host TOOK OWNERSHIP of the handle. Returning zero
-// means it did not, and the caller reclaims the screen — so a host that
-// declines must not have destroyed, entered or retained the handle. Same
-// re-entrancy rule as `xpui_host_screen_finish`: record, then act after the
-// frame.
-//
-// `title` is BORROWED FOR THE CALL.
+// it through `xpui_screen.h` and free it with `xpui_screen_destroy`. Returns
+// non-zero when the host TOOK OWNERSHIP. Zero means it did not and the caller
+// reclaims the screen, so a host that declines must not have destroyed,
+// entered or retained the handle. Same re-entrancy rule as
+// `xpui_host_screen_finish`: record, then act after the frame. `title` is
+// BORROWED FOR THE CALL.
 uint8_t xpui_host_screen_present(void* screen, const uint8_t* title);
 
 // -- translations ------------------------------------------------------------
 
 // Looks `key` up in the host's string table. Returns the key itself when it is
-// unknown, so a typo shows up on screen rather than as a blank row. IMMORTAL.
+// unknown, so a typo shows up on screen rather than as a blank row, and an
+// empty string for a null key. IMMORTAL when found; otherwise the pointer you
+// passed, so pass an immortal key.
 const uint8_t* xpui_host_tr(const uint8_t* key);
 
 // -- device ------------------------------------------------------------------
@@ -129,17 +116,11 @@ int32_t xpui_host_heap_min_free(void);
 //
 // Only reached from a firmware build: on a desktop the standard library has
 // its own handler and a second would be a link error. Nothing can be
-// recovered — the framework builds with `panic = "abort"` — so this does not
-// return, and the most useful thing it can do is say so somewhere a person
-// will see.
-//
-// It does not return in practice — every implementation aborts — but it is
-// declared plainly, without `__attribute__((noreturn))`, because the ABI type
-// checker in `crates/backend/fui/tests/abi.rs` reads declarations rather than
-// parsing C, and an attribute after the parameter list defeats it. The Rust
-// side spins after calling, so nothing depends on the attribute.
-//
-// `message` is BORROWED FOR THE CALL and is never null.
+// recovered — the framework builds with `panic = "abort"` — so say so
+// somewhere a person will see. Declared without `__attribute__((noreturn))`
+// because the ABI checker reads declarations rather than parsing C, and an
+// attribute after the parameter list defeats it; the Rust side spins after
+// calling. `message` is BORROWED FOR THE CALL and is never null.
 void xpui_host_panic(const uint8_t* message);
 
 #ifdef __cplusplus

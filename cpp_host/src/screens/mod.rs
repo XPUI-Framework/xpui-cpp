@@ -5,8 +5,8 @@
 //! list with its per-cell callback, a header, button hints, a slider, a dialog
 //! with a scrim over content, and text measured through the host's own font.
 //!
-//! Screen work belongs in `cargo run -p xpui-gallery`, where iterating costs a
-//! Rust rebuild rather than a CMake one.
+//! Screen work belongs in `xpui-gallery`'s `cargo run -p xpui-gallery`, where
+//! iterating costs a Rust rebuild rather than a CMake one.
 
 mod about;
 mod controls;

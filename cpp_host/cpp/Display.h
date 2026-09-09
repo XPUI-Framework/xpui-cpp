@@ -56,7 +56,7 @@ class Display {
   // Writes the last blitted pixels as a 24-bit bottom-up BMP.
   //
   // Hand-rolled rather than `SDL_SaveBMP`: headless must not need SDL to have
-  // been initialised, and the format is 45 lines.
+  // been initialised, and the format is short.
   //
   // A non-empty `crop` writes that rectangle only, clipped to the panel. What
   // it is for: comparing two runs that differ in one band. A whole frame is the

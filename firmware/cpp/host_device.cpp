@@ -1,6 +1,6 @@
 // Device identity and battery, on a device.
 //
-// The mirror of `examples/cpp_host/cpp/host_device.cpp`, and the clearest
+// The mirror of `cpp_host/cpp/host_device.cpp`, and the clearest
 // example of what this whole boundary is for: same three symbols, same header,
 // completely different answers. A laptop says "no battery"; this reads the
 // board.

@@ -9,6 +9,9 @@ repository.workspace = true
 readme = "README.md"
 publish = false
 
+[lints]
+workspace = true
+
 [lib]
 # The name is set explicitly rather than derived from the package, because
 # CMake links the archive by path: renaming the package would otherwise move
@@ -20,27 +23,16 @@ path = "src/lib.rs"
 # what keeps `cargo build --workspace` honest about this crate compiling.
 crate-type = ["staticlib", "rlib"]
 
-# No Rust test harness. Every `xpui_host_*` symbol this crate calls is defined
-# by the C++ half, so a test binary could only link against doubles — a fourth
-# place for the ABI to rot, testing a wrapper that adds no logic of its own.
-# What this crate actually has to prove is that the whole stack links and
-# draws, and that is `xpui-host --selftest`, run by ctest.
+# No Rust test harness: every `xpui_host_*` symbol this crate calls is defined
+# by the C++ half. `abi/` checks the ABI, and `xpui-host --selftest`, run by
+# ctest, proves the whole stack links and draws.
 test = false
 
-# Doctests are **on**, and that is a change from when this crate had none.
-#
-# `docs/tutorial.md` is nine Rust snippets and `src/lib.rs` pulls it in, so the
-# tutorial is compiled on every run. They link because none of them calls
-# across the FFI: a doctest is a binary that links this crate like any other,
-# and nothing links the C++ half into it, so a snippet reaching `strings::tr`
-# or `device::name` would fail at the link rather than the compile. That is why
-# those modules' own examples are fenced `text` and say so where they are
-# written, and why the tutorial's snippets stand up their own stand-ins.
-#
-# It was `doctest = false` and the tutorial ran anyway, because `--doc` on the
-# command line overrides the manifest key. Nine snippets checked by a flag
-# precedence nobody chose is nine snippets one cargo release away from silently
-# not being checked at all.
+# Doctests are on: `docs/tutorial.md` is nine Rust snippets and `src/lib.rs`
+# pulls it in, so the tutorial is compiled on every run. They link because
+# none of them calls across the FFI — a doctest links this crate without the
+# C++ half, so a snippet reaching `strings::tr` would fail at the link, which
+# is why those modules' own examples are fenced `text`.
 
 # `xpui/testing` installs the deterministic fake host, so the tutorial's
 # "prove it without a device" snippets run as doctests. A dev dependency

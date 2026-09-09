@@ -3,19 +3,9 @@
 //! This crate is the staticlib a host links, and a staticlib is a final
 //! artifact: on bare metal it must carry a global allocator and a panic
 //! handler, or nothing that links it will build. On a desktop the standard
-//! library brings both, and defining a second is a link error rather than a
-//! nicety — so everything here is `cfg(target_os = "none")`.
-//!
-//! That is why this file lives here rather than in `examples/firmware`. The
-//! PlatformIO example started with a Rust crate of its own, wrapping this one
-//! to add exactly these two items, and it could not build: cargo produces
-//! every declared crate-type, so `xpui-cpp-host`'s own staticlib was compiled
-//! for the device without an allocator and failed first. The runtime belongs
-//! to whichever crate *is* the staticlib, and there is only one.
-//!
-//! The result is better than the wrapper would have been: a firmware links the
-//! same archive a desktop does, and porting the screens to a device is not a
-//! line of Rust.
+//! library brings both, and defining a second is a link error — so everything
+//! here is `cfg(target_os = "none")`. The runtime belongs to whichever crate
+//! *is* the staticlib, and there is only one.
 
 #![cfg(target_os = "none")]
 

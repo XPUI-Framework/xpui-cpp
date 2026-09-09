@@ -3,13 +3,13 @@
 // The whole of the device-specific wiring, and it is short on purpose: what
 // this example exists to show is the *build*, not the application. Every
 // screen, the navigator, the platform and the ABI declarations come from
-// `examples/cpp_host` unchanged; what is here is a framebuffer, an entry
-// point, and the four `host_*.cpp` files a laptop answers differently.
+// `cpp_host/` unchanged; what is here is a framebuffer, an entry point, and
+// the four `host_*.cpp` files a laptop answers differently.
 //
 //   pio run -e default    Xteink X3, ESP32-C3
 //   pio run -e sticky     Seeed Sticky, ESP32-S3
 //
-// **There is no panel driver**, for the same reason `examples/esp32` has none:
+// **There is no panel driver**, for the same reason `xpui-esp32` has none:
 // no published Rust or C++ driver exists for these panels that this repository
 // can test. `flush()` below is where one goes.
 
@@ -37,9 +37,9 @@ constexpr char TAG[] = "xpui";
 // dimensions and not merely dimensions the buffer can hold: every screen is
 // laid out against them, so a Sticky told it is 528x792 lays out 48 px wider
 // than its glass and 8 px shorter — and boots, and logs a plausible ink count,
-// and looks fine until somebody holds one. The numbers are `Board::X3` and
-// `Board::STICKY` from `crates/boards`, which is the same source the simulator
-// measures against.
+// and looks fine until somebody holds one. The numbers are the `X3` and
+// `STICKY` boards in `xpui-boards`, the same source the simulator measures
+// against.
 #if !defined(XPUI_PANEL_WIDTH) || !defined(XPUI_PANEL_HEIGHT)
 #error "platformio.ini must define XPUI_PANEL_WIDTH and XPUI_PANEL_HEIGHT for this board"
 #endif
@@ -66,8 +66,8 @@ void requestPresent() { g_updateRequested = true; }
 // The X3 and the Sticky drive their glass over SPI through a command sequence,
 // a waveform table and a wait on a BUSY line. None of that is in this
 // repository and none of it can be tested from it, so this reports what it
-// would have pushed and stops. See `examples/esp32/src/panel.rs` for the same
-// seam on the pure-Rust side.
+// would have pushed and stops. `xpui-esp32`'s `panel.rs` is the same seam on
+// the pure-Rust side.
 void flush() {
   size_t ink = 0;
   for (size_t index = 0; index < FRAMEBUFFER_BYTES; ++index) {

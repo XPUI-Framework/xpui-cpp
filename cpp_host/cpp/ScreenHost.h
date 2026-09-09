@@ -31,9 +31,8 @@ class ScreenHost {
   const uint8_t* title() const { return title_; }
 
  private:
-  // Points the FFI globals at this screen. Called on entry and again at the
-  // top of every loop() and render(), so a screen resumed from the stack
-  // regains them without a second onEnter().
+  // Points the FFI globals at this screen. Called at every entry point, so a
+  // screen resumed from the stack regains them without a second onEnter().
   void bindGlobals();
 
   void* screen_;

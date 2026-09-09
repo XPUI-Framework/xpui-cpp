@@ -23,10 +23,6 @@
 
 namespace xpui_host {
 
-// Defined here because this is the file that owns it — the desktop host's
-// `host_input.cpp` does the same. `internal.h` only declares it, so whichever
-// of the two hosts is linked has to supply one, and neither can supply both.
-//
 // Null, and it stays null: no input manager is wired on this board. Every
 // query below reads as "nothing pressed" without going near it.
 Input* g_input = nullptr;
@@ -40,15 +36,8 @@ uint8_t xpui_host_is_pressed(uint8_t) { return 0; }
 uint8_t xpui_host_was_released(uint8_t) { return 0; }
 uint8_t xpui_host_was_home_gesture(void) { return 0; }
 
-// Whether this board has a Left/Right pair, from its own build flag beside the
-// two that say how big its panel is — the keys and the panel being two facts
-// about the same device.
-//
-// It is not cosmetic. A board **without** the pair opens a value control on
-// Confirm and gives four keys a second meaning while it is open; a board with
-// the pair nudges the value in place and never opens anything. Answering wrong
-// is either a mode that never opens or one that opens where its keys do
-// something else.
+// From the board's own build flag, beside the two that say how big its panel
+// is; `xpui_host.h` says what hangs on the answer.
 uint8_t xpui_host_has_left_right_keys(void) { return XPUI_HAS_LEFT_RIGHT_KEYS; }
 
 // Microseconds since boot, as milliseconds. The framework needs it for key

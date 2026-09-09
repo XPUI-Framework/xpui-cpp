@@ -14,7 +14,6 @@ pub fn name() -> &'static str {
     unsafe { borrow_static(raw::xpui_host_device_name()) }
 }
 
-/// The firmware version string.
 pub fn firmware_version() -> &'static str {
     // Safety: as above.
     unsafe { borrow_static(raw::xpui_host_firmware_version()) }

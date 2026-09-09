@@ -10,7 +10,7 @@
 //!   |  xpui_screen_*   lifecycle, defined in xpui-fui   ->
 //!   |  xpui_app_*      this crate                       ->
 //!   <- xpui_host_*     answered by cpp/host_*.cpp
-//!   <- xpui_fui_*      drawing, answered by cpp/xpui_fui.cpp
+//!   <- xpui_fui_*      drawing, answered by xpui-fui's cpp/xpui_fui.cpp
 //! ```
 //!
 //! Four sets of symbols, two crossing each way, and every one of them is
@@ -25,11 +25,8 @@
 
 #![cfg_attr(target_os = "none", no_std)]
 
-/// This repository's prose, compiled.
-///
-/// The tutorial teaches both sides of the boundary at once, so its snippets
-/// have to reach both headers: `xpui_screen.h` from the backend and
-/// `xpui_host.h` from this repository. Only here can they.
+/// This repository's prose, compiled: the tutorial's snippets need the crates
+/// this one depends on.
 #[cfg(doctest)]
 mod guides {
     #[doc = include_str!("../../docs/tutorial.md")]
@@ -64,14 +61,11 @@ static SHELL: Shell = Shell;
 /// **Two installs, not one.** `xpui` keeps the two apart because they answer
 /// to different owners, and a host that supplies only the first gets a screen
 /// that draws perfectly and whose Back button silently does nothing.
-///
-/// Idempotent, and called from `main` before any screen exists. A firmware
-/// with a separate render task has to install from every entry point that
-/// could run first; a host with one thread does it once, here, which is the
-/// difference this example is allowed to have from the firmware it mirrors.
+/// Idempotent: a firmware with a separate render task installs from every
+/// entry point that could run first.
 ///
 /// # Safety
-/// Call once, from the thread that will run the frame loop, before the first
+/// Call from the thread that will run the frame loop, before the first
 /// screen is created. Installing while a frame is in flight is a data race,
 /// not a stale pointer.
 #[unsafe(no_mangle)]

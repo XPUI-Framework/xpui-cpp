@@ -1,11 +1,9 @@
 // A C++ application that runs xpui screens.
 //
-// The whole point of this file is that everything below it has been compiled,
-// linked and executed: `xpui_fui.cpp` is 882 lines that a firmware is supposed
-// to add to its build, and until this example existed nothing had ever run
-// them. `--selftest` and the `--expect-*` flags turn that into a pass or a
-// fail — never a regex over the summary line, because ctest ignores a test's
-// exit code the moment PASS_REGULAR_EXPRESSION is set.
+// Everything below it has been compiled, linked and executed: `xpui_fui.cpp`
+// is what a firmware adds to its build, and this is the only thing that runs
+// it. `--selftest` and the `--expect-*` flags turn that into a pass or a
+// fail, through the exit code.
 //
 //   xpui-host                                  a window, 480x800
 //   xpui-host --headless --frames 30 --selftest
@@ -62,12 +60,6 @@ struct Options {
 
   // What the run has to end up with, or exit non-zero. Negative is "do not
   // check".
-  //
-  // These are flags rather than something a test greps out of the summary
-  // line, and that is not a style choice: **ctest ignores the exit code
-  // entirely when PASS_REGULAR_EXPRESSION is set**, so a test written that way
-  // passes a run whose `--selftest` failed. Everything a test asserts has to
-  // reach the exit code.
   long expectDepth = -1;
   long expectMaxDepth = -1;
   long expectInkAtLeast = -1;
@@ -200,16 +192,12 @@ void report(const Options& options, const Display& display, const ScreenStack& s
 
 // What `xpui_host_tr` promises, checked.
 //
-// Two halves, and the second is a **soundness** requirement rather than a
-// nicety. A key that is in the table comes back as a pointer into the table.
-// A key that is not comes back as *the caller's own pointer* — which is how a
-// missing string shows up on the panel as the key itself instead of a blank
-// row, and which is why the Rust side takes `&'static CStr` and can hand the
-// result back as a `&'static str`. Return a copy, or `""`, and that bound
-// stops being justified while everything still compiles and still draws.
-//
-// Nothing else here exercises a missing key: the one runtime caller looks up
-// STR_MENU_TITLE, which is in the table.
+// The second half is a **soundness** requirement: a key that is not in the
+// table comes back as *the caller's own pointer*, which is why the Rust side
+// takes `&'static CStr` and can hand the result back as a `&'static str`.
+// Return a copy, or `""`, and that bound stops being justified while
+// everything still compiles and still draws. Nothing else here exercises a
+// missing key.
 int checkI18n() {
   int failures = 0;
 

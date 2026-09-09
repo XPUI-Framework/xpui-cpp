@@ -1,29 +1,17 @@
 // What this host can say about its own memory.
 //
-// A firmware asks its RTOS: Rust allocates through the same heap the C++ does,
-// so four calls cover both languages, and they are the only visibility into
-// what Rust costs at run time — a build-time size report measures static
-// sections, where Rust contributes almost nothing.
+// A firmware asks its RTOS, and there Rust allocates through the same heap
+// the C++ does, so four calls cover both languages. A desktop has neither an
+// RTOS nor a heap ceiling, so this counts what it can, and two consequences
+// show on the About screen: the figures cover the C++ side only, because
+// Rust's desktop allocator is the system one and never comes through
+// `operator new`; and fragmentation cannot be measured, so `largest_block`
+// answers -1 rather than repeating `free` — the same "I cannot tell you" the
+// battery uses.
 //
-// A desktop has neither an RTOS nor a heap ceiling, so this counts what it can
-// actually count. Two consequences, both visible on the About screen rather
-// than hidden here:
-//
-//   * The figures cover the C++ side only. Rust's allocator on a desktop is
-//     the system one and does not come through `operator new`. Joining the two
-//     is a `#[global_allocator]` routing to the host's malloc, which is what a
-//     firmware does and where that belongs.
-//
-//   * Fragmentation cannot be measured, so `largest_block` answers -1 rather
-//     than repeating `free` — the same "I cannot tell you" the battery uses.
-//     Inventing a number here would make the one figure that matters on a
-//     device with no MMU into decoration.
-//
-// One consequence worth knowing before pointing a tool at this: the binary
-// aborts under AddressSanitizer, in trackedFree, on a block ASan's own
-// interposition routed here. Instrumenting the run without ASan shows zero
-// foreign frees, so the replacement itself is consistent — but ASan is exactly
-// the tool you would reach for to check that, and it cannot be used.
+// The binary aborts under AddressSanitizer, in trackedFree, on a block
+// ASan's own interposition routed here. Without ASan there are zero foreign
+// frees, so the replacement is consistent — but ASan cannot be used on it.
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -102,12 +90,9 @@ void operator delete[](void* pointer, size_t) noexcept { trackedFree(pointer); }
 
 namespace {
 
-// The budget less what is out, clamped rather than cast.
-//
-// A live figure past `INT32_MAX` would otherwise overflow a signed subtraction
-// — reachable with a large enough `--size` — and the ABI's own convention
-// gives the honest answer for free: negative means "cannot tell you", and a
-// heap that has outgrown the frame it is reported against cannot be.
+// The budget less what is out, clamped at zero rather than cast: a live
+// figure past `INT32_MAX` would otherwise overflow a signed subtraction,
+// reachable with a large enough `--size`.
 int32_t remaining(const size_t used) {
   if (used > static_cast<size_t>(kBudget)) return 0;
   return kBudget - static_cast<int32_t>(used);

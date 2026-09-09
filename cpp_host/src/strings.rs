@@ -16,20 +16,15 @@ use crate::raw;
 /// Takes a [`CStr`] so a caller can pass a `c"…"` literal and nothing is
 /// allocated: this is called from `body()`, which runs on every paint.
 ///
-/// Fenced as `text`, and it is the only reason this crate's examples ever are:
-/// a doctest links this crate without the C++ half, so a snippet that actually
-/// called this would fail at the link. Doctests are on — the tutorial is nine
-/// of them — and they run because none of them crosses the boundary.
-///
 /// ```text
 /// Text::new(strings::tr(c"STR_ABOUT_TITLE"))
 /// ```
 ///
-/// **The key must be `'static`, and that is a soundness requirement rather
-/// than a convenience.** An unknown key comes back as *the caller's own
-/// pointer* — that is how a typo shows up on screen as the key itself — so a
-/// borrowed key would be handed back as a `&'static str` that dangles the
-/// moment it is dropped. The bound makes that unwriteable.
+/// Fenced as `text` because a doctest links this crate without the C++ half.
+/// **The key must be `'static`, and that is soundness**: an unknown key comes
+/// back as *the caller's own pointer* — how a typo shows up on screen as the
+/// key itself — so a borrowed key would be handed back as a `&'static str`
+/// that dangles the moment it is dropped.
 pub fn tr(key: &'static CStr) -> &'static str {
     // Safety: `key` is NUL-terminated by construction and lives for the
     // program, so both answers `xpui_host_tr` can give — a pointer into the

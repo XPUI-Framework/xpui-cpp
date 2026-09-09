@@ -1,11 +1,5 @@
-// Heap figures, from the RTOS.
-//
-// **This is the pay-off for routing Rust's allocator through the firmware's
-// `malloc`.** On the desktop host these four cover the C++ side only, and the
-// About screen says so. Here they cover both languages, because there is one
-// heap — which makes them the only visibility into what Rust costs at run
-// time: the build-time size report measures static sections, where Rust
-// contributes almost nothing.
+// Heap figures, from the RTOS: one heap, so these cover both languages — the
+// pay-off for routing Rust's allocator through the firmware's `malloc`.
 
 #include <esp_heap_caps.h>
 

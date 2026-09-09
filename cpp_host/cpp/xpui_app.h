@@ -16,12 +16,10 @@ extern "C" {
 
 // Installs what paints and what navigates.
 //
-// Call ONCE, from the thread that runs the frame loop, before creating the
-// first screen. The framework keeps both as plain statics with no locking, so
-// installing while a frame is in flight is a data race rather than a stale
-// pointer — see `xpui::host::install`.
-//
-// Note the ordering with `xpui_fui_attach`: attaching only tells the *shim*
+// Call from the thread that runs the frame loop, before creating the first
+// screen; a second call is a no-op. Both are plain statics with no locking,
+// so installing while a frame is in flight is a data race rather than a stale
+// pointer. Order matters with `xpui_fui_attach`: attaching tells the *shim*
 // where the panel is, and this tells the *framework* where the shim is.
 // Neither works without the other, and nothing checks that both happened.
 void xpui_app_install(void);

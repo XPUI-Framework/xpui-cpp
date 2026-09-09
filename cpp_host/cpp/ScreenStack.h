@@ -1,21 +1,15 @@
 // The stack of screens, and the frame that drives the top one.
 //
-// This is the piece that makes `Navigator` mean something. Without it the
-// globals in `internal.h` would be cargo cult — what makes them load-bearing
-// is a pushed screen clearing them on its way out and the screen beneath being
-// resumed without a second onEnter.
+// This is what makes `Navigator` mean something: a pushed screen clears the
+// globals in `internal.h` on its way out, and the screen beneath is resumed
+// without a second onEnter. The order of operations mirrors `xpui::App`,
+// deliberately: pop before push, and both after the frame rather than during
+// it, because a screen asks to be finished from inside its own loop().
 //
-// The order of operations mirrors `xpui::App`, deliberately: pop before push,
-// and both after the frame rather than during it. A screen asks to be finished
-// from inside its own loop(), so acting on the request there would free the
-// object currently executing.
-//
-// **Every screen here is opaque, never an overlay.** `xpui`'s own stack paints
-// the screens beneath an overlay before painting it, using `Driver::is_overlay`
-// — which this ABI does not carry, because `xpui_screen.h` is six functions and
-// a seventh only this host would use is not worth the drift. A dialog is an
-// overlay *inside* a screen's own body, which is where these examples put
-// theirs; a host that wants overlay screens needs that call added.
+// **Every screen here is opaque, never an overlay.** `xpui`'s own stack
+// paints the screens beneath an overlay using `Driver::is_overlay`, which
+// this ABI does not carry. A dialog is an overlay *inside* a screen's own
+// body, which is where these examples put theirs.
 
 #pragma once
 

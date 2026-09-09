@@ -28,7 +28,7 @@ pub enum Msg {
     Frontlight(bool),
     /// The refresh-mode row: opens the picker.
     PickMode,
-    /// A mode chosen from the picker.
+    /// A mode chosen from the picker, as an index into `modes()`.
     ChoseMode(usize),
     /// The picker dismissed without choosing.
     DismissPicker,
@@ -66,10 +66,6 @@ impl Controls {
     }
 
     /// Moves the level, and rewrites its label only when it actually moved.
-    ///
-    /// The label is a `String`, so writing it on every message would allocate
-    /// on opening a dialog and on closing one — neither of which changes a
-    /// number.
     fn set_level(&mut self, value: i32) {
         let next = value.clamp(0, 100);
         if next == self.level {
@@ -148,8 +144,6 @@ impl Screen for Controls {
         match message {
             Msg::Level(value) => self.set_level(value),
             Msg::StepLevel(delta) => self.set_level(self.level.saturating_add(delta)),
-            // The toggle hands over the state it is moving to, so no screen
-            // ever writes `!self.something`.
             Msg::Frontlight(next) => self.frontlight = next,
             Msg::PickMode => self.picking = true,
             Msg::ChoseMode(index) => {

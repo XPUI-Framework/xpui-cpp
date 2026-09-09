@@ -12,7 +12,7 @@
 namespace xpui_host {
 
 // xpui::Button has fifteen variants. Kept as a count rather than an enum: this
-// side never needs to name one, only to index by the tag Rust sent.
+// side indexes by the tag Rust sent and names only the keys the keyboard maps.
 constexpr uint8_t kButtonCount = 15;
 
 class Input {

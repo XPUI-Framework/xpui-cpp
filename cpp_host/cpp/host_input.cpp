@@ -10,8 +10,8 @@ namespace xpui_host {
 
 Input* g_input = nullptr;
 
-// True unless a run says otherwise: the keyboard has arrow keys, and so does
-// every board this binary is built for but one.
+// True unless a run says otherwise: the keyboard has arrow keys. `--no-pair`
+// exercises the other half.
 bool g_hasLeftRightKeys = true;
 
 void setHasLeftRightKeys(const bool present) { g_hasLeftRightKeys = present; }
