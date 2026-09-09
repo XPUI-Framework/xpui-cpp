@@ -121,9 +121,8 @@ fn shared_with_firmware() -> Result<Vec<String>, String> {
             if let Some(path) = piece.split('>').next()
                 && let Some(rest) = path.strip_prefix("../../")
                 && rest.starts_with("cpp_host/cpp/")
-                // A glob is not a filename. `[env:simulator_x3]` filters with
-                // `+<../../cpp_host/cpp/*.cpp>`, and pushing that literal made
-                // the symbol scan read a path that cannot be opened.
+                // A glob is not a filename: `[env:simulator_x3]` filters with
+                // `+<../../cpp_host/cpp/*.cpp>`.
                 && !rest.contains('*')
                 && !rest.contains('?')
             {
