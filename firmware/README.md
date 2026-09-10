@@ -1,7 +1,6 @@
-# An ESP32 firmware, built by PlatformIO
+[![CI](https://github.com/XPUI-Framework/xpui-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/XPUI-Framework/xpui-cpp/actions/workflows/ci.yml) [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../LICENSE)
 
-> ⚠️ **Under heavy development.** Not production-ready. The API can break
-> without notice. Use at your own risk.
+# An ESP32 firmware, built by PlatformIO
 
 `cpp_host` proves the C ABI on a desktop, with CMake. This proves the thing a
 firmware author actually has to do: get Rust compiled by PlatformIO, linked

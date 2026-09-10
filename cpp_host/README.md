@@ -1,7 +1,6 @@
-# `xpui-cpp-host`
+[![CI](https://github.com/XPUI-Framework/xpui-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/XPUI-Framework/xpui-cpp/actions/workflows/ci.yml) [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../LICENSE)
 
-> ⚠️ **Under heavy development.** Not production-ready. The API can break
-> without notice. Use at your own risk.
+# `xpui-cpp-host`
 
 The worked example of a C++ application hosting `xpui` screens: a desktop
 window over SDL2, a screen stack the C++ owns, and three Rust screens on it.
