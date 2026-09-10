@@ -80,6 +80,7 @@ fn kilobytes(bytes: i32) -> String {
     format!("{} KB", bytes.saturating_add(512) / 1024)
 }
 
+/// The device and its heap, as they were when last read.
 pub struct About {
     figures: Figures,
 }
@@ -91,6 +92,8 @@ impl Default for About {
 }
 
 impl About {
+    /// Takes the first reading. `Msg::Refresh` takes another; on e-ink a
+    /// repaint costs a second, so it is a row rather than a frame timer.
     pub fn new() -> Self {
         About {
             figures: Figures::read(),

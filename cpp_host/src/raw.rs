@@ -22,8 +22,11 @@ unsafe extern "C" {
     // `button` is `xpui::Button`'s own discriminant. The host maps it to a key,
     // and the mapping is the one `xpui-simulator` uses, so the two desktop
     // hosts agree about what Enter does.
+    /// Whether `button` went down since the last frame.
     pub safe fn xpui_host_was_pressed(button: u8) -> u8;
+    /// Whether `button` is down now.
     pub safe fn xpui_host_is_pressed(button: u8) -> u8;
+    /// Whether `button` came up since the last frame.
     pub safe fn xpui_host_was_released(button: u8) -> u8;
     /// The system-level "go home" gesture, offered to the screen before the
     /// host applies its own meaning.
@@ -41,6 +44,10 @@ unsafe extern "C" {
     /// The pointer is **immortal** — the host interns every title it is given
     /// and never frees one — which is what lets this be read as a `'static`
     /// string on the Rust side.
+    ///
+    /// # Safety
+    /// Read the result as a NUL-terminated string and nothing else; the host
+    /// owns it, so it is never freed on this side.
     pub fn xpui_host_screen_title() -> *const u8;
 
     /// Pops the running screen. Recorded and acted on after the frame, because
@@ -53,6 +60,11 @@ unsafe extern "C" {
     /// non-zero when the host **took ownership**; on zero it has not, and the
     /// caller still owns the handle and must reclaim it. `title` is borrowed
     /// for the duration of the call and interned by the host.
+    ///
+    /// # Safety
+    /// `screen` must be a handle no caller has reclaimed, and `title` a
+    /// NUL-terminated string that outlives the call. A handle presented twice
+    /// is freed twice.
     pub fn xpui_host_screen_present(screen: *mut c_void, title: *const u8) -> u8;
 
     // -- translations --------------------------------------------------------
@@ -61,13 +73,24 @@ unsafe extern "C" {
     /// Returns the key itself when it is unknown, so a typo shows up on screen
     /// rather than crashing or drawing a blank — so the answer is immortal
     /// only if the key was, which `strings::tr` guarantees by its signature.
+    ///
+    /// # Safety
+    /// `key` must be NUL-terminated and must outlive every read of the result,
+    /// which may be `key` itself.
     pub fn xpui_host_tr(key: *const u8) -> *const u8;
 
     // -- device --------------------------------------------------------------
     /// Immortal: a pointer into the host's static storage.
+    ///
+    /// # Safety
+    /// Read as a NUL-terminated string; never freed on this side.
     pub fn xpui_host_device_name() -> *const u8;
     /// Immortal, as above.
+    ///
+    /// # Safety
+    /// As above.
     pub fn xpui_host_firmware_version() -> *const u8;
+    /// Charge in percent, or a negative number where the host cannot say.
     pub safe fn xpui_host_battery_percent() -> i32;
 
     // -- panics --------------------------------------------------------------
@@ -81,6 +104,9 @@ unsafe extern "C" {
     /// warnings are failures. The gate's symbol check and `abi/tests/abi.rs` both
     /// read this file as text, so the `cfg` is invisible to them and the
     /// header still has to declare it.
+    ///
+    /// # Safety
+    /// `message` must be NUL-terminated and valid for the call.
     #[cfg(target_os = "none")]
     pub fn xpui_host_panic(message: *const u8);
 
@@ -89,8 +115,13 @@ unsafe extern "C" {
     // What the host can measure of its own allocations. On a firmware Rust
     // allocates from this same heap and these cover both languages; on a
     // desktop they do not, which `heap.rs` says where a reader can see it.
+    /// The heap's size in bytes.
     pub safe fn xpui_host_heap_total() -> i32;
+    /// Bytes free now.
     pub safe fn xpui_host_heap_free() -> i32;
+    /// The largest single allocation that would succeed, or `-1` where the
+    /// host cannot measure fragmentation.
     pub safe fn xpui_host_heap_largest_block() -> i32;
+    /// The least `free` has ever been.
     pub safe fn xpui_host_heap_min_free() -> i32;
 }

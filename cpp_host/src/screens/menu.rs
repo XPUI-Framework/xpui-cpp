@@ -14,7 +14,9 @@ use crate::strings::tr;
 /// What the menu can open.
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Example {
+    /// The device and heap figures.
     About,
+    /// The value controls.
     Controls,
 }
 
@@ -32,6 +34,7 @@ impl Default for Menu {
 }
 
 impl Menu {
+    /// Named for `register_screen!`, which calls `new` on the type it is handed.
     pub fn new() -> Self {
         Menu
     }

@@ -5,6 +5,8 @@
 
 The two ABI boundaries this repository owns, checked on every run.
 
+## Using it
+
 Five boundaries cross between Rust and C++ in this organisation. Three belong
 to the backend and are checked in
 [`xpui-backends`](https://github.com/XPUI-Framework/xpui-backends); these two
@@ -21,16 +23,19 @@ only place they exist is the macro's own body, in another repository — so
 A git dependency lands in a cargo checkout directory with no path a sibling can
 name, which is why a string and not a file.
 
-## What it catches that a link does not
+What it catches that a link does not: C has no mangling, so two swapped
+parameters resolve perfectly and corrupt the call frame. `symbols_agree` in
+[`xtask/src/boundary.rs`](../xtask/src/boundary.rs) compares which symbols
+*exist*; this compares what they *are*. Neither subsumes the other, and a
+symbol wrong in the second way is a rendering fault somewhere unrelated.
 
-C has no mangling, so two swapped parameters resolve perfectly and corrupt the
-call frame. `symbols_agree` in `../xtask/src/boundary.rs` compares which
-symbols *exist*; this compares what they *are*. Neither subsumes the other, and
-a symbol wrong in the second way is a rendering fault somewhere unrelated.
+## Checking it
 
 ```bash
 cargo test -p xpui-cpp-abi
 ```
+
+The gate runs the same thing under `tests`.
 
 ## License
 

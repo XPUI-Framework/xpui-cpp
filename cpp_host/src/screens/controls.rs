@@ -34,6 +34,11 @@ pub enum Msg {
     DismissPicker,
 }
 
+/// A slider, a stepper, a toggle and a picker.
+///
+/// **The stepper is what the two frame-comparing ctest cases look at**: their
+/// crop is the band it sits in, chosen to leave the toggle's focus mark
+/// outside. Remove it and both cases still pass, comparing nothing.
 pub struct Controls {
     level: i32,
     frontlight: bool,
@@ -50,6 +55,7 @@ impl Default for Controls {
 }
 
 impl Controls {
+    /// Starts at 60%, front light on, the first mode.
     pub fn new() -> Self {
         Controls {
             level: 60,

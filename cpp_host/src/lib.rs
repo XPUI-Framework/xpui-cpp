@@ -24,13 +24,17 @@
 //! a Rust binary with no stack of its own would use instead.
 
 #![cfg_attr(target_os = "none", no_std)]
+#![deny(missing_docs)]
 
-/// This repository's prose, compiled: the tutorial's snippets need the crates
-/// this one depends on.
+/// The two `docs/` pages, mounted: the tutorial's snippets need the crates
+/// this one depends on, and `boundary.md` is mounted so a fence added to it
+/// is compiled from the start.
 #[cfg(doctest)]
 mod guides {
     #[doc = include_str!("../../docs/tutorial.md")]
     pub mod tutorial {}
+    #[doc = include_str!("../../docs/boundary.md")]
+    pub mod boundary {}
 }
 
 extern crate alloc;
@@ -47,7 +51,7 @@ mod strings;
 // reuse: the C++ under `cpp/` is a desktop harness, and these are not.
 pub mod screens;
 
-use xpui_fui::{Backend, register_screen};
+use xpui_fui::Backend;
 
 use crate::platform::HostPlatform;
 use crate::shell::Shell;
@@ -83,5 +87,21 @@ pub unsafe extern "C" fn xpui_app_install() {
 
 // The root screen's factory. The screen type never crosses the boundary — the
 // host gets an opaque handle — so adding a screen is one line here and one
-// declaration in `cpp/xpui_app.h`.
-register_screen!(screens::Menu, xpui_app_create_menu);
+// declaration in `cpp/xpui_app.h`. A *private* module because the macro
+// writes an undocumented `pub fn` and takes no doc of its own: privacy is
+// what puts it out of `missing_docs`' reach, and the re-export below is what
+// gives it a page and its contract back.
+mod factory {
+    #![allow(missing_docs)]
+
+    use crate::screens;
+    use xpui_fui::register_screen;
+
+    register_screen!(screens::Menu, xpui_app_create_menu);
+}
+
+/// The root screen's factory, as `cpp/xpui_app.h` declares it.
+///
+/// The host calls it once, and owns the opaque handle it gets back until it
+/// hands that handle to `xpui_screen_destroy`.
+pub use factory::xpui_app_create_menu;
