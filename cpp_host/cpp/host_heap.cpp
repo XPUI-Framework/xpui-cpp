@@ -90,11 +90,12 @@ void operator delete[](void* pointer, size_t) noexcept { trackedFree(pointer); }
 
 namespace {
 
-// The budget less what is out, clamped at zero rather than cast: a live
-// figure past `INT32_MAX` would otherwise overflow a signed subtraction,
-// reachable with a large enough `--size`.
+// The budget less what is out, or -1 once more is out than the budget. The
+// frame is invented, so past it there is no honest figure: zero would claim a
+// heap exactly full, and a subtraction past `INT32_MAX` would overflow. A
+// large enough `--size` reaches it.
 int32_t remaining(const size_t used) {
-  if (used > static_cast<size_t>(kBudget)) return 0;
+  if (used > static_cast<size_t>(kBudget)) return -1;
   return kBudget - static_cast<int32_t>(used);
 }
 

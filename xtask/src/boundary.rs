@@ -167,16 +167,17 @@ fn glob(dir: &str, prefix: &str, suffix: &str) -> Vec<PathBuf> {
 /// says it must do.
 pub fn host_compiles() -> Result<String, String> {
     let Some(sdk) = cpp::freeink_include() else {
-        return Ok("skipped: FreeInkUI headers not found. Set FREEINK_SDK_INCLUDE.".into());
+        return cpp::skipped("FreeInkUI headers not found. Set FREEINK_SDK_INCLUDE.");
     };
     let shim = backends_cpp();
     if !shim.is_dir() {
-        return Ok("skipped: the backends repository is not beside this one. \
-                   Clone XPUI-Framework/xpui-backends, or set XPUI_BACKENDS_DIR."
-            .into());
+        return cpp::skipped(
+            "the backends repository is not beside this one. \
+             Clone XPUI-Framework/xpui-backends, or set XPUI_BACKENDS_DIR.",
+        );
     }
     let Some(sdl) = sdl_cflags() else {
-        return Ok("skipped: SDL2 headers not found (sdl2-config, pkg-config sdl2).".into());
+        return cpp::skipped("SDL2 headers not found (sdl2-config, pkg-config sdl2).");
     };
     let mut command = std::process::Command::new("clang++");
     command
@@ -233,7 +234,7 @@ pub fn host_runs() -> Result<String, String> {
         .output()
         .is_err()
     {
-        return Ok("skipped: cmake not installed.".into());
+        return cpp::skipped("cmake not installed.");
     }
     let mut configure = vec![
         "-S".to_string(),

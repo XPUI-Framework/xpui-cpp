@@ -3,10 +3,14 @@
 You have a C++ firmware. You want to write its next screen in Rust, without
 rewriting the firmware and without the two halves drifting apart.
 
-This walks the whole boundary once. Every block below is compiled by
-`./build-and-test.sh` — the Rust ones as doctests, the C++ ones each as its own
-translation unit — so a snippet that stops being true fails the build rather
-than quietly misleading whoever reads it next.
+This walks the whole boundary once. Every Rust block below is a doctest, which
+`./build-and-test.sh` compiles on every run. Every C++ block is compiled as its
+own translation unit by the same gate **only when it finds the FreeInkUI
+headers and `xpui-backends`**; without either, that stage prints `skipped:` and
+the gate still passes, so read its note. CI has both, and fails rather than
+skips. [`README.md`](../README.md)'s
+`## Requirements` says where each may sit. A snippet that stops being true then
+fails the build rather than quietly misleading whoever reads it next.
 
 `cargo test --workspace` runs the Rust half by hand.
 
@@ -33,6 +37,8 @@ everything below is one of these four boxes:
 
 The two arrows pointing left are things **you** implement in C++. The two
 pointing right are things Rust gives you. Nothing else crosses.
+[`boundary.md`](boundary.md) is the reference for all four: who defines each,
+and what proves the two sides agree.
 
 ---
 
@@ -628,14 +634,16 @@ this machine and flashes nothing.
 and it is the page to trust on that, since this section is under a warning that
 nothing here is checked.
 
-Then build, flash, and watch it come up.
-[`firmware/README.md`](../firmware/README.md) has the build commands and the
-one PlatformIO trap worth knowing; flashing adds `-t upload` to them, and then
-a second command to read the serial port:
+Then build, flash, and watch it come up, from `firmware/`, where
+`platformio.ini` is. [`firmware/README.md`](../firmware/README.md) has the
+build commands, what the S3 needs installed first, and the one PlatformIO trap
+worth knowing; flashing adds `-t upload` to them, and then a second command
+reads the serial port at the console's 115200 baud:
 
 ```bash
+cd firmware
 pio run -e <environment> -t upload
-pio device monitor
+pio device monitor -b 115200
 ```
 
 `platformio.ini` runs `scripts/build_rust.py` before every compile, so `pio
@@ -671,7 +679,7 @@ builds a firmware — which may be you, now — rather than in any check.
 ## What changes for a real firmware
 
 Not much, which is the point. [`firmware`](../firmware) is the same Rust — the same
-crate, not a fork — and five C++ files:
+crate, not a fork — and six C++ files:
 
 | | |
 |---|---|
@@ -680,20 +688,7 @@ crate, not a fork — and five C++ files:
 | `host_device.cpp` | your board configuration |
 | `host_heap.cpp` | your RTOS |
 | `host_panic.cpp` | your log |
-
-Two things do change, and both are improvements:
-
-**Rust allocates from your heap.** Give it a `#[global_allocator]` that calls
-your `malloc`, as
-[`cpp_host/src/runtime.rs`](../cpp_host/src/runtime.rs)
-does, and `xpui_host_heap_*` then reports figures covering both languages. It
-is the only visibility you get into what Rust costs at run time — a build-time
-size report measures static sections, where it contributes almost nothing.
-
-**Fragmentation becomes measurable.** On a desktop `largest_block` answers "I
-cannot tell you". Your RTOS can, and on a device with no MMU the gap between
-"free" and "largest block" is what actually decides whether the next allocation
-fails.
+| `sdk_out_of_line.cpp` | your build already compiles its SDK |
 
 ## What it costs in memory
 
@@ -702,16 +697,18 @@ Measure it, because the intuition is wrong in a specific and expensive way.
 **Rust contributes almost nothing to static RAM, no matter how much it uses.**
 A build-time size report measures `.data`, `.bss` and `.noinit`, and a Rust
 screen allocates its strings and its widget tree through the heap — your heap,
-once you give it a `#[global_allocator]` routing to your `malloc`. A report
-saying Rust costs 26 KB of static RAM is telling you about its statics and
-nothing about the screen.
+once you give it a `#[global_allocator]` routing to your `malloc`, as
+[`cpp_host/src/runtime.rs`](../cpp_host/src/runtime.rs) does. A report
+crediting Rust with a few kilobytes of static RAM is telling you about its
+statics and nothing about the screen.
 
 So the figure that matters is the heap, over a screen's lifetime:
 
 ```rust
 # #[derive(Copy, Clone)]
 # struct Reading { free: i32, largest_block: i32 }
-# // Two readings a host actually gave, either side of a screen that leaked.
+# // Two invented readings, from a host that can measure fragmentation,
+# // either side of a screen that leaked.
 # fn heap_on_entry() -> Reading { Reading { free: 32_768, largest_block: 20_480 } }
 # fn heap_on_exit() -> Reading { Reading { free: 32_720, largest_block: 18_944 } }
 let before = heap_on_entry();

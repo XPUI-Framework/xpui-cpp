@@ -21,7 +21,8 @@ with `-Z build-std`. That needs the esp-rs toolchain (`espup install`) and its
 
 Adapted from CrossPoint's `scripts/build_rust.py`. **An FFI or layout change
 in either repository should be mirrored in the other**, and nothing enforces
-that — see `examples/cpp_host/README.md` for the file-by-file map.
+that — see `docs/boundary.md`, "The firmware this host was modelled on", for
+the file-by-file map.
 """
 
 import os
@@ -122,7 +123,7 @@ def setup_help(toolchain):
             "installs both on the first build. Nothing else to do.",
             "",
         ]
-    steps += ["See examples/firmware/README.md for how the Rust build fits in.", ""]
+    steps += ["See docs/boundary.md, under \"The firmware\", for how the Rust build fits in.", ""]
     return "\n".join(steps)
 
 

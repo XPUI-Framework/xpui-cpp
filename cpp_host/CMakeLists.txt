@@ -19,8 +19,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 get_filename_component(XPUI_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
 
-# The shim's two headers and its 882 lines of C++ live in the backends
-# repository now. A sibling checkout by default, like the FreeInk SDK; point
+# The shim's two headers and its C++ live in the backends repository. A
+# sibling checkout by default, like the FreeInk SDK; point
 # XPUI_BACKENDS_DIR somewhere else if yours is not beside this one.
 if(NOT DEFINED XPUI_BACKENDS_DIR)
   if(DEFINED ENV{XPUI_BACKENDS_DIR})

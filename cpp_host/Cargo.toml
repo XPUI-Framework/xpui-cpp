@@ -28,8 +28,10 @@ crate-type = ["staticlib", "rlib"]
 # ctest, proves the whole stack links and draws.
 test = false
 
-# Doctests are on: `docs/tutorial.md` is nine Rust snippets and `src/lib.rs`
-# pulls it in, so the tutorial is compiled on every run. They link because
+# Doctests stay on, by cargo's default, with no key here: `src/lib.rs` mounts
+# `docs/tutorial.md` and `docs/boundary.md`, so the tutorial's nine Rust
+# snippets are compiled on every run. A `doctest = false` would silence them
+# and the gate's `doctests` stage would still pass. They link because
 # none of them calls across the FFI — a doctest links this crate without the
 # C++ half, so a snippet reaching `strings::tr` would fail at the link, which
 # is why those modules' own examples are fenced `text`.

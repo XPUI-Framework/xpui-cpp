@@ -2,7 +2,8 @@
 
 The C ABI between a C++ application and its Rust screens: which symbols
 cross, in which direction, who defines each, what the desktop host was
-modelled on, and what proves the two sides agree.
+modelled on, and what proves the two sides agree. The
+[tutorial](tutorial.md) walks the same boundary a step at a time.
 
 ## Four sets of symbols, two crossing each way
 
@@ -46,8 +47,8 @@ reference, not an obligation**: the host is what the gate builds and runs,
 and what an ABI change is designed and proven against. A firmware consuming
 the ABI is on its own cadence, and nothing links the two.
 
-The right-hand column is that firmware's paths, kept so the shapes can be
-compared.
+The right-hand column is that firmware's paths — CrossPoint's — kept so the
+shapes can be compared.
 
 | Here | The firmware it was modelled on |
 |---|---|
@@ -105,7 +106,7 @@ independently, and each has been broken on purpose to check that it notices:
 |---|---|
 | something asked for the panel to update | the present hook never fired |
 | a frame was blitted | the loop never painted |
-| the framebuffer holds both ink and paper | **a build that linked `xpui-fui/testing`** — every C symbol replaced by a host double, links cleanly, draws nothing |
+| the framebuffer holds both ink and paper | **a build that linked `xpui-fui/testing`** — 28 of the 30 drawing symbols replaced by a host double, links cleanly, draws nothing |
 
 The last one is the reason this is a self-test and not just an exit code. An
 all-white panel is its only symptom anywhere.
@@ -156,15 +157,14 @@ ESP32, and the port is the result worth reading.
 |---|---|
 | Rust changed | **nothing** |
 | C++ shared with the desktop host | `ScreenHost`, `ScreenStack`, `host_screen.cpp`, `host_i18n.cpp`, and the shim |
-| C++ written for the device | `main.cpp`, and four `host_*.cpp` |
+| C++ written for the device | `main.cpp`, four `host_*.cpp`, and `sdk_out_of_line.cpp` |
 
 The screens, the `Platform`, the `Navigator`, every `xpui_host_*` declaration
 and the whole of `xpui` come from `cpp_host` **as a dependency, not a
 copy** — `scripts/build_rust.py` builds that same package. What a laptop and a
 device genuinely disagree about is input, the panel, device identity, the heap
-and where a panic goes, which is what `firmware/cpp/` holds — `main.cpp`,
-four `host_*.cpp`, and one translation unit that gives the header-only SDK a
-home.
+and where a panic goes, which is what five of `firmware/cpp/`'s six files
+hold; the sixth gives the header-only SDK a home.
 If porting had meant forking the screens, the boundary would be in the wrong
 place. It did not, and that is the claim.
 

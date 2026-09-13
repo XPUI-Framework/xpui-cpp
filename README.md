@@ -1,6 +1,11 @@
 [![CI](https://github.com/XPUI-Framework/xpui-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/XPUI-Framework/xpui-cpp/actions/workflows/ci.yml) [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-# `xpui-cpp`
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-black.png">
+  <img src="assets/logo-white.png" alt="XPUI" width="64" height="64">
+</picture>
+
+# C++
 
 > [!WARNING]
 > Under heavy development. Not production-ready. The API can break without
@@ -12,13 +17,15 @@ you have a firmware written in C++ and want one screen of it in Rust. Not a
 rewrite — a screen at a time, called through six lifecycle entry points and an
 opaque `void*`.
 
+Every document in this repository is listed in [docs/README.md](docs/README.md).
+
 ## Which crate you want
 
-| | |
-|---|---|
-| [`cpp_host`](cpp_host/) | The worked example, and the only thing any gate in this organisation builds, links and *runs* the FreeInkUI shim through. Design an ABI change here |
-| [`firmware`](firmware/) | The same C++ through PlatformIO, for a real ESP32. No gate invokes it, so a break surfaces when somebody builds a firmware |
-| [`abi`](abi/) | Two of the five ABI boundaries, checked — the two that cross into the *application*: `xpui_host.h` against the Rust that calls it, and `xpui_app.h` against the macro that defines it. The other three are the backend's and are checked there |
+|                         |                                                                                                                                                                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`cpp_host`](cpp_host/) | The worked example, and the only thing any gate in this organisation builds, links and _runs_ the FreeInkUI shim through. Design an ABI change here                                                                                                                      |
+| [`firmware`](firmware/) | The same C++ through PlatformIO, for a real ESP32. No gate invokes it, so a break surfaces when somebody builds a firmware                                                                                                                                               |
+| [`abi`](abi/)           | Two of the five ABI boundaries, checked — the two that cross into the _application_: `xpui_host.h` against the Rust that calls it, and `xpui_app.h` against `src/lib.rs` and the macro that defines its factory. The other three are the backend's and are checked there |
 
 ## Using it
 
@@ -41,11 +48,14 @@ checkout directory with no path a `CMakeLists.txt` can name.
 ## Requirements
 
 - **`xpui-backends`, cloned beside this repository** — or named by
-  `XPUI_BACKENDS_DIR`.
-- **The FreeInk SDK**, the same arrangement: beside the checkout, or named by
-  `FREEINK_SDK_INCLUDE`, or fetched by CMake at the revision
-  [`cpp_host/freeink-sdk.rev`](cpp_host/freeink-sdk.rev) pins, which CI reads
-  too.
+  `XPUI_BACKENDS_DIR`. Without it the two stages that compile C++ print
+  `skipped:` and pass on a laptop, fail on CI, and `all` fails.
+- **The FreeInk SDK's FreeInkUI headers**, for those same two stages: named
+  by `FREEINK_SDK_INCLUDE`, or in one of the sibling layouts `freeink_include`
+  in [`xtask/src/cpp.rs`](xtask/src/cpp.rs) lists. Without them both skip
+  and pass, except on CI, where a skip is a failure. `all` needs no local copy: CMake fetches the revision
+  [`cpp_host/freeink-sdk.rev`](cpp_host/freeink-sdk.rev) pins, which CI
+  reads too.
 - **SDL2**, for the desktop host's window.
 - **clang-format 21 or newer**, for the C++ format stage; an older binary
   ignores options it does not know and formats differently, silently.
@@ -61,16 +71,8 @@ checkout directory with no path a `CMakeLists.txt` can name.
 The checks themselves are in [`xtask/`](xtask/) — this repository's own list,
 in Rust, holding nothing it does not run. `./build-and-test.sh fix` formats
 in place first. `all` is the only place in the organisation where the C ABI
-is compiled, linked and *executed* rather than syntax-checked. How a change is
+is compiled, linked and _executed_ rather than syntax-checked. How a change is
 reviewed is in [docs/contributing.md](docs/contributing.md).
-
-## Where next
-
-| | |
-|---|---|
-| [docs/tutorial.md](docs/tutorial.md) | **Start here.** Eleven steps: write a screen, get its words from your string table, export it, drive it, open it from the menu you already have, answer what the framework asks, teach the firmware a new symbol, start it, build it, test it with no device, and flash it |
-| [docs/boundary.md](docs/boundary.md) | the four symbol sets and who defines each, the double-boxed handle, the firmware this host was modelled on and the three deliberate differences, what the nine `ctest` cases prove, and what porting to a device cost |
-| [docs/contributing.md](docs/contributing.md) | the requirements, the gate in both modes, the two-place rule for a C symbol, the five review steps, and how a commit is written |
 
 ## Where it sits
 
@@ -81,7 +83,7 @@ knowing it exists, and a firmware reaches whatever it needs directly rather
 than through whoever happens to sit above it.
 
 ```mermaid
-flowchart BT
+flowchart TD
   xpui["xpui<br/>the framework"]
   chrome["xpui-chrome<br/>components"]
   boards["xpui-boards<br/>seven devices"]

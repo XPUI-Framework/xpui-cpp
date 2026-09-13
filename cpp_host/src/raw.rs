@@ -22,11 +22,12 @@ unsafe extern "C" {
     // `button` is `xpui::Button`'s own discriminant. The host maps it to a key,
     // and the mapping is the one `xpui-simulator` uses, so the two desktop
     // hosts agree about what Enter does.
-    /// Whether `button` went down since the last frame.
+    /// Whether `button` went down since the last frame. True for exactly one
+    /// frame, and reading it does not consume it.
     pub safe fn xpui_host_was_pressed(button: u8) -> u8;
     /// Whether `button` is down now.
     pub safe fn xpui_host_is_pressed(button: u8) -> u8;
-    /// Whether `button` came up since the last frame.
+    /// Whether `button` came up since the last frame, on the same terms.
     pub safe fn xpui_host_was_released(button: u8) -> u8;
     /// The system-level "go home" gesture, offered to the screen before the
     /// host applies its own meaning.
@@ -115,13 +116,15 @@ unsafe extern "C" {
     // What the host can measure of its own allocations. On a firmware Rust
     // allocates from this same heap and these cover both languages; on a
     // desktop they do not, which `heap.rs` says where a reader can see it.
-    /// The heap's size in bytes.
+    /// The heap's size in bytes, or a negative number where the host cannot
+    /// say. A host with no ceiling may answer a frame of its own choosing.
     pub safe fn xpui_host_heap_total() -> i32;
-    /// Bytes free now.
+    /// Bytes free now, or a negative number where the host cannot say.
     pub safe fn xpui_host_heap_free() -> i32;
-    /// The largest single allocation that would succeed, or `-1` where the
-    /// host cannot measure fragmentation.
+    /// The largest single allocation that would succeed, or a negative number
+    /// where the host cannot measure fragmentation.
     pub safe fn xpui_host_heap_largest_block() -> i32;
-    /// The least `free` has ever been.
+    /// The least `free` has ever been, or a negative number where the host
+    /// cannot say.
     pub safe fn xpui_host_heap_min_free() -> i32;
 }

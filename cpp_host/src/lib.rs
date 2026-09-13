@@ -17,6 +17,14 @@
 //! declared in exactly one header. See `cpp/xpui_host.h` for the pair this
 //! crate depends on.
 //!
+//! The root screen's factory, [`xpui_app_create_menu`], is public at the crate
+//! root beside [`xpui_app_install`], so both have a page here. This stops
+//! compiling if it is not:
+//!
+//! ```
+//! let _ = xpui_cpp_host::xpui_app_create_menu;
+//! ```
+//!
 //! # What is deliberately not here
 //!
 //! No frame loop, no window, no allocator. The loop belongs to the host —
@@ -26,9 +34,9 @@
 #![cfg_attr(target_os = "none", no_std)]
 #![deny(missing_docs)]
 
-/// The two `docs/` pages, mounted: the tutorial's snippets need the crates
-/// this one depends on, and `boundary.md` is mounted so a fence added to it
-/// is compiled from the start.
+/// `docs/tutorial.md` and `docs/boundary.md`, mounted: the tutorial's
+/// snippets need the crates this one depends on, and `boundary.md` is mounted
+/// so a fence added to it is compiled from the start.
 #[cfg(doctest)]
 mod guides {
     #[doc = include_str!("../../docs/tutorial.md")]
@@ -87,10 +95,11 @@ pub unsafe extern "C" fn xpui_app_install() {
 
 // The root screen's factory. The screen type never crosses the boundary — the
 // host gets an opaque handle — so adding a screen is one line here and one
-// declaration in `cpp/xpui_app.h`. A *private* module because the macro
-// writes an undocumented `pub fn` and takes no doc of its own: privacy is
-// what puts it out of `missing_docs`' reach, and the re-export below is what
-// gives it a page and its contract back.
+// declaration in `cpp/xpui_app.h`. A module of its own because the macro
+// writes an undocumented `pub fn` and takes no doc of its own. The `allow` is
+// load-bearing: the re-export below makes the function public, so
+// `missing_docs` reaches its definition here, and without the `allow` the
+// build fails. The re-export is what gives it a page and its contract back.
 mod factory {
     #![allow(missing_docs)]
 

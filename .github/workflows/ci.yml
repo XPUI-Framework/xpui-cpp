@@ -1,18 +1,19 @@
 name: CI
 
-# Every push to `main`, and every pull request. The job below runs
-# `./build-and-test.sh`, which is the same script a developer runs — so a green
-# tick here means exactly what a green run means locally.
+# Every push to `main`, and every pull request. The gate job runs
+# `./build-and-test.sh all`, the same script a developer runs, and the firmware
+# job builds the three PlatformIO environments no gate stage reaches — so every
+# line of C++ here is compiled on every change.
 on:
   push:
     branches: [main]
   pull_request:
-  # By hand, so a rotated token or a changed runner can be checked without a
+  # By hand, so a changed runner can be checked without a
   # fake commit.
   workflow_dispatch:
 
-# Read the checkout and nothing else: nothing here pushes, the sibling fetch
-# below carries its own token, and the screenshot upload uses the runner's.
+# Read the checkout and nothing else: nothing here pushes, and the screenshot
+# upload uses the runner's own token.
 permissions:
   contents: read
 
@@ -35,24 +36,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # The organisation's repositories are private, and a workflow's built-in
-      # GITHUB_TOKEN reaches only the repository it runs in. Cargo fetches the
-      # siblings over HTTPS, so the fetch is rewritten to carry a token that
-      # can read them. Without this the failure is a 404 that reads like a typo.
-      - name: Reach the organisation's private repositories
-        run: |
-          git config --global \
-            url."https://x-access-token:${{ secrets.XPUI_CI_TOKEN }}@github.com/".insteadOf \
-            "https://github.com/"
-
       # The simulator links SDL2, so the workspace does not build without it.
       - name: Install SDL2
         run: sudo apt-get update && sudo apt-get install -y libsdl2-dev
 
       # `.clang-format` uses options that need 21 or newer, and Ubuntu ships 18.
       # There is no `clang-format-21` in its repositories, so apt is not an
-      # option. **No version fallback**: a fallback quietly installed 18 once
-      # and left the failure to surface three steps later as "too old".
+      # option. **No version fallback**: a fallback quietly installs 18 and
+      # leaves the failure to surface three steps later as "too old".
       - name: Install clang-format
         run: |
           pipx install "clang-format==21.1.8" \
@@ -62,19 +53,26 @@ jobs:
       - name: Show clang-format version
         run: clang-format --version
 
-      # The C++ half needs the SDK it binds to. The gate skips that check with a
-      # note when the SDK is absent, which is right for a laptop and wrong here
-      # — passed explicitly so a skip on CI is impossible.
+      # The C++ needs the SDK it binds to and `xpui-backends`' shim, both as
+      # sibling checkouts — the layout the gate, CMake and `platformio.ini`
+      # all look for. With `CI` set the gate fails rather than skips when
+      # either is missing, so a broken fetch cannot pass as clean.
       #
-      # **Pinned to a revision**, in one file CMake reads too: a revision
-      # written down twice is a revision that will disagree with itself.
-      - name: Fetch the FreeInk SDK
+      # **Each pinned to a revision written down once**: the SDK's in
+      # `cpp_host/freeink-sdk.rev`, which CMake reads too, and the backends'
+      # in `Cargo.lock`, so the C++ shim is the commit the Rust half links.
+      - name: Fetch the FreeInk SDK and xpui-backends
         run: |
-          revision="$(cat cpp_host/freeink-sdk.rev)"
+          sdk="$(cat cpp_host/freeink-sdk.rev)"
+          backends="$(sed -n 's|^source = "git+https://github.com/XPUI-Framework/xpui-backends?branch=main#\([0-9a-f]*\)"$|\1|p' Cargo.lock | head -1)"
+          test -n "$backends"
           git clone --filter=blob:none --no-checkout \
-            https://github.com/Free-Ink/freeink-sdk.git /tmp/freeink-sdk
-          git -C /tmp/freeink-sdk checkout "$revision"
-          echo "FREEINK_SDK_INCLUDE=/tmp/freeink-sdk/libs/ui/FreeInkUI/include" >> "$GITHUB_ENV"
+            https://github.com/Free-Ink/freeink-sdk.git ../freeink-sdk
+          git -C ../freeink-sdk checkout "$sdk"
+          git clone --filter=blob:none --no-checkout \
+            https://github.com/XPUI-Framework/xpui-backends.git ../xpui-backends
+          git -C ../xpui-backends checkout "$backends"
+          echo "FREEINK_SDK_INCLUDE=$(realpath ../freeink-sdk)/libs/ui/FreeInkUI/include" >> "$GITHUB_ENV"
 
       # `rust-toolchain.toml` pins the channel and the components, so rustup
       # installs exactly that on the first cargo call. The RISC-V target it
@@ -99,9 +97,10 @@ jobs:
       # One step, running the same script a developer runs, because two lists
       # of checks drift. Anything CI needs that a laptop does not is setup,
       # above; anything that decides whether the code is good is in the script,
-      # where it can be run before pushing.
+      # where it can be run before pushing. `all`, so the desktop host is also
+      # built, linked and run through its ctest cases.
       - name: Gate
-        run: ./build-and-test.sh check
+        run: ./build-and-test.sh all
 
       # A failed screenshot writes expected | actual | differences side by side,
       # so a failure here can be looked at rather than guessed at.
@@ -114,3 +113,65 @@ jobs:
             target/diff/
             target/screenshots/
           if-no-files-found: ignore
+
+  firmware:
+    name: The firmware (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+
+    # One environment per board, and the desktop build of the same sources.
+    # `build_rust.py` builds the Rust half for whichever one is running.
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [simulator_x3, default, sticky]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install SDL2
+        if: matrix.environment == 'simulator_x3'
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev
+
+      # The same two siblings, at the same two pins, as the gate job.
+      - name: Fetch the FreeInk SDK and xpui-backends
+        run: |
+          sdk="$(cat cpp_host/freeink-sdk.rev)"
+          backends="$(sed -n 's|^source = "git+https://github.com/XPUI-Framework/xpui-backends?branch=main#\([0-9a-f]*\)"$|\1|p' Cargo.lock | head -1)"
+          test -n "$backends"
+          git clone --filter=blob:none --no-checkout \
+            https://github.com/Free-Ink/freeink-sdk.git ../freeink-sdk
+          git -C ../freeink-sdk checkout "$sdk"
+          git clone --filter=blob:none --no-checkout \
+            https://github.com/XPUI-Framework/xpui-backends.git ../xpui-backends
+          git -C ../xpui-backends checkout "$backends"
+
+      - name: Install Rust
+        run: rustup show active-toolchain
+
+      # The ESP32-S3 is Xtensa, which no stable Rust targets: its Rust half
+      # needs the esp-rs fork, installed as the toolchain `esp` that
+      # `build_rust.py` asks for.
+      - name: Install the Xtensa Rust toolchain
+        if: matrix.environment == 'sticky'
+        uses: esp-rs/xtensa-toolchain@v1.7.0
+        with:
+          buildtargets: esp32s3
+          default: false
+
+      # The version this repository's firmware is known to build with.
+      - name: Install PlatformIO
+        run: pipx install "platformio==6.1.19"
+
+      - name: Cache PlatformIO and cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: firmware-${{ matrix.environment }}-${{ hashFiles('firmware/platformio.ini', '**/Cargo.lock', 'rust-toolchain.toml') }}
+          restore-keys: firmware-${{ matrix.environment }}-
+
+      - name: Build
+        run: cd firmware && pio run -e ${{ matrix.environment }}

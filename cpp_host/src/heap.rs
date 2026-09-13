@@ -26,7 +26,12 @@ pub struct Reading {
 }
 
 impl Reading {
+    /// `total` less `free`, or `-1` when the host could not say either: a
+    /// difference taken against an unknown is a made-up figure.
     pub fn used(&self) -> i32 {
+        if self.total < 0 || self.free < 0 {
+            return -1;
+        }
         self.total.saturating_sub(self.free)
     }
 }

@@ -28,11 +28,13 @@ ignores options it does not know and formats differently with no warning.
 
 Three things bite here more than anywhere else:
 
-- **A C symbol exists in two places, and both move together**: its
-  declaration in `cpp_host/cpp/xpui_host.h` or `xpui_app.h`, and the Rust
-  that calls or defines it. `the header's symbols are all defined` catches a
-  name in `xpui_host.h` that neither the desktop host nor the firmware
-  defines; `abi/` is what reaches `xpui_app.h`, and what catches two
+- **A C symbol exists in four places, and all four move together**: its
+  declaration in `cpp_host/cpp/xpui_host.h` or `xpui_app.h`; the Rust that
+  calls or defines it, in `cpp_host/src/raw.rs` or `lib.rs`; the desktop
+  host's C++ under `cpp_host/cpp/`; and the firmware's under `firmware/cpp/`
+  or in a file `firmware/platformio.ini` shares. `the header's symbols are
+  all defined` catches a name in `xpui_host.h` that either C++ side does not
+  define; `abi/` is what reaches `xpui_app.h`, and what catches two
   parameters swapped, which links fine and corrupts the call frame.
 - **`raw.rs` marks a declaration `safe fn` only when no argument can reach
   undefined behaviour.** Anything taking or returning a pointer stays

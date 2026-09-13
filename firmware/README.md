@@ -11,6 +11,8 @@ unit that gives the header-only SDK a home.
 
 ## Using it
 
+From this directory, where `platformio.ini` is:
+
 ```bash
 export FREEINK_SDK_DIR=/path/to/freeink-sdk   # once
 
@@ -18,6 +20,12 @@ pio run -e simulator_x3    # a window, on this machine
 pio run -e default         # Xteink X3, ESP32-C3
 pio run -e sticky          # Seeed Sticky, ESP32-S3
 ```
+
+`sticky` needs the esp-rs toolchain first: Xtensa is out of stable Rust's
+reach, so install the `esp` fork with
+`cargo install espup --locked && espup install`, and source `~/export-esp.sh`
+so its linker is on `PATH`. The other two need nothing beyond what
+`rust-toolchain.toml` pins, which cargo installs on the first build.
 
 All three build. The two device environments produce flashable images —
 265 kB for the C3, 280 kB for the S3 — and the simulator one produces the same

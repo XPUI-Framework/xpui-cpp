@@ -14,6 +14,8 @@ same binary through PlatformIO, which no gate invokes.
 
 ## Using it
 
+From the repository root:
+
 ```bash
 cmake -S cpp_host -B target/cpp_host -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build target/cpp_host
@@ -48,6 +50,8 @@ What it deliberately does not do:
   where it is joined.
 
 ## Checking it
+
+From the repository root, once the host is built:
 
 ```bash
 ctest --test-dir target/cpp_host --output-on-failure
