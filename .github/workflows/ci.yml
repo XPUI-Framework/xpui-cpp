@@ -82,7 +82,7 @@ jobs:
         run: rustup show active-toolchain
 
       - name: Cache cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.rustup/toolchains
@@ -163,7 +163,7 @@ jobs:
         run: pipx install "platformio==6.1.19"
 
       - name: Cache PlatformIO and cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.platformio
