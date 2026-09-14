@@ -1,6 +1,6 @@
 # The C ABI
 
-The C functions that cross between a C++ application and its Rust screens, as
+The C functions that cross between a C++ application and its [Rust](https://rust-lang.org/) screens, as
 this repository's two headers declare them:
 [`cpp_host/cpp/xpui_app.h`](../../cpp_host/cpp/xpui_app.h), which is what the
 application exports, and [`cpp_host/cpp/xpui_host.h`](../../cpp_host/cpp/xpui_host.h),
@@ -129,10 +129,11 @@ Installs what paints and what navigates.
 void xpui_app_install(void);
 ```
 
-Call it from the thread that runs the frame loop, before creating the first
-screen; a second call is a no-op. Both installs are plain statics with no
-locking, so installing while a frame is in flight is a data race rather than a
-stale pointer.
+Call it before creating the first screen; a second call is a no-op, so a
+firmware with a separate render task may call it from each entry point that
+could run first. No call may overlap a frame on any task, or another call:
+both installs are plain statics with no locking, so overlapping them is a data
+race rather than a stale pointer.
 
 Order matters with `xpui_fui_attach`: attaching tells the **shim** where the
 panel is, and this tells the **framework** where the shim is. Neither works

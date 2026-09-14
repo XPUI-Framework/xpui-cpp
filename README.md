@@ -13,7 +13,7 @@
 
 The C++ side of the boundary: an application that already owns its screen
 stack, hosting `xpui` screens over a C ABI. This is the repository to read if
-you have a firmware written in C++ and want one screen of it in Rust. Not a
+you have a firmware written in C++ and want one screen of it in [Rust](https://rust-lang.org/). Not a
 rewrite — a screen at a time, called through six lifecycle entry points and an
 opaque `void*`.
 
@@ -23,8 +23,8 @@ Every document in this repository is listed in [docs/README.md](docs/README.md).
 
 |                         |                                                                                                                                                                                                                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`cpp_host`](cpp_host/) | The worked example, and the only thing any gate in this organisation builds, links and _runs_ the FreeInkUI shim through. Design an ABI change here                                                                                                                      |
-| [`firmware`](firmware/) | The same C++ through PlatformIO, for a real ESP32. No gate invokes it, so a break surfaces when somebody builds a firmware                                                                                                                                               |
+| [`cpp_host`](cpp_host/) | The worked example, and the only thing any gate in this organisation builds, links and _runs_ the [FreeInkUI](https://github.com/Free-Ink/freeink-sdk/tree/main/libs/ui/FreeInkUI) shim through. Design an ABI change here                                                                                                                      |
+| [`firmware`](firmware/) | The same C++ through [PlatformIO](https://platformio.org/), for a real ESP32. No gate invokes it, so a break surfaces when somebody builds a firmware                                                                                                                                               |
 | [`abi`](abi/)           | Two of the five ABI boundaries, checked — the two that cross into the _application_: `xpui_host.h` against the Rust that calls it, and `xpui_app.h` against `src/lib.rs` and the macro that defines its factory. The other three are the backend's and are checked there |
 
 ## Using it
@@ -50,16 +50,16 @@ checkout directory with no path a `CMakeLists.txt` can name.
 - **`xpui-backends`, cloned beside this repository** — or named by
   `XPUI_BACKENDS_DIR`. Without it the two stages that compile C++ print
   `skipped:` and pass on a laptop, fail on CI, and `all` fails.
-- **The FreeInk SDK's FreeInkUI headers**, for those same two stages: named
+- **The [FreeInk SDK](https://github.com/Free-Ink/freeink-sdk)'s FreeInkUI headers**, for those same two stages: named
   by `FREEINK_SDK_INCLUDE`, or in one of the sibling layouts `freeink_include`
   in [`xtask/src/cpp.rs`](xtask/src/cpp.rs) lists. Without them both skip
-  and pass, except on CI, where a skip is a failure. `all` needs no local copy: CMake fetches the revision
+  and pass, except on CI, where a skip is a failure. `all` needs no local copy: [CMake](https://cmake.org/) fetches the revision
   [`cpp_host/freeink-sdk.rev`](cpp_host/freeink-sdk.rev) pins, which CI
   reads too.
-- **SDL2**, for the desktop host's window.
-- **clang-format 21 or newer**, for the C++ format stage; an older binary
+- **[SDL2](https://www.libsdl.org/)**, for the desktop host's window.
+- **[clang-format](https://clang.llvm.org/docs/ClangFormat.html) 21 or newer**, for the C++ format stage; an older binary
   ignores options it does not know and formats differently, silently.
-- **CMake and Ninja**, for `all`.
+- **CMake and [Ninja](https://ninja-build.org/)**, for `all`.
 
 ## Checking it
 

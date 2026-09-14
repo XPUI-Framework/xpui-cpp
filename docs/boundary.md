@@ -1,6 +1,6 @@
 # The boundary
 
-The C ABI between a C++ application and its Rust screens: which symbols
+The C ABI between a C++ application and its [Rust](https://rust-lang.org/) screens: which symbols
 cross, in which direction, who defines each, what the desktop host was
 modelled on, and what proves the two sides agree. The
 [tutorial](tutorial.md) walks the same boundary a step at a time.
@@ -42,12 +42,12 @@ reference, not an obligation**: the host is what the gate builds and runs,
 and what an ABI change is designed and proven against. A firmware consuming
 the ABI is on its own cadence, and nothing links the two.
 
-The right-hand column is that firmware's paths — CrossPoint's — kept so the
+The right-hand column is that firmware's paths — [CrossPoint](https://crosspointreader.com/)'s — kept so the
 shapes can be compared.
 
 | Here | The firmware it was modelled on |
 |---|---|
-| `cpp/main.cpp` | `src/main.cpp`, and the Arduino loop |
+| `cpp/main.cpp` | `src/main.cpp`, and the [Arduino](https://www.arduino.cc/) loop |
 | `cpp/ScreenHost.{h,cpp}` | `src/activities/ActivityRs.{h,cpp}` |
 | `cpp/ScreenStack.{h,cpp}` | `src/activities/ActivityManager.{h,cpp}` |
 | `cpp/Display.{h,cpp}` | `GfxRenderer` and the panel driver |
@@ -80,7 +80,7 @@ Each is documented at its site so it is not "fixed" back:
 - **No `renderer` argument on render.** CrossPoint's own comment says its one
   is unused; a parameter nothing reads can drift from the header unnoticed.
 - **One install, not two.** That firmware installs the host from `on_enter`
-  *and* `render` because two FreeRTOS tasks race for the first frame. A host
+  *and* `render` because two [FreeRTOS](https://www.freertos.org/) tasks race for the first frame. A host
   with one thread installs once, before the first screen exists.
 - **`Navigator::present` crosses the FFI.** The firmware cannot push a Rust
   screen from Rust; here it can, because the handle is opaque and thin. A host
@@ -90,7 +90,7 @@ Each is documented at its site so it is not "fixed" back:
 ## What the nine `ctest` cases prove
 
 All headless. **Every assertion is an exit code**, through the `--expect-*`
-flags, never a pattern matched against the summary line: `ctest` ignores a
+flags, never a pattern matched against the summary line: [`ctest`](https://cmake.org/) ignores a
 test's exit status entirely once `PASS_REGULAR_EXPRESSION` is set, so a run
 that printed a failure and exited 1 would still be reported as passing.
 
@@ -143,7 +143,7 @@ exists so that path is proven here rather than assumed.
 
 ## The firmware
 
-[`firmware/`](../firmware/) builds the same C++ through PlatformIO, for a real
+[`firmware/`](../firmware/) builds the same C++ through [PlatformIO](https://platformio.org/), for a real
 ESP32, and the port is the result worth reading.
 
 ### What porting to a device cost
@@ -183,7 +183,7 @@ costs at run time: a build-time size report measures static sections, where
 it contributes almost nothing.
 
 `largest_block` also stops being `-1`. A desktop cannot measure fragmentation;
-ESP-IDF can, and on a device with no MMU the gap between "free" and "largest
+[ESP-IDF](https://www.espressif.com/en/products/sdks/esp-idf) can, and on a device with no MMU the gap between "free" and "largest
 block" is the figure that actually decides whether the next allocation fails.
 
 ### There is no panel driver

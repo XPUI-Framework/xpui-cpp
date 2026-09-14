@@ -2,8 +2,8 @@
 
 # An ESP32 firmware, built by PlatformIO
 
-`cpp_host` proves the C ABI on a desktop, with CMake. This proves the thing a
-firmware author actually has to do: get Rust compiled by PlatformIO, linked
+`cpp_host` proves the C ABI on a desktop, with [CMake](https://cmake.org/). This proves the thing a
+firmware author actually has to do: get [Rust](https://rust-lang.org/) compiled by [PlatformIO](https://platformio.org/), linked
 into an ESP32 image, and running beside the C++ that was already there. The
 port changed no Rust at all; what a laptop and a device disagree about is the
 six files under `cpp/` — `main.cpp`, four `host_*.cpp`, and one translation
@@ -21,7 +21,7 @@ pio run -e default         # Xteink X3, ESP32-C3
 pio run -e sticky          # Seeed Sticky, ESP32-S3
 ```
 
-`sticky` needs the esp-rs toolchain first: Xtensa is out of stable Rust's
+`sticky` needs the [esp-rs toolchain](https://github.com/esp-rs/rust) first: Xtensa is out of stable Rust's
 reach, so install the `esp` fork with
 `cargo install espup --locked && espup install`, and source `~/export-esp.sh`
 so its linker is on `PATH`. The other two need nothing beyond what
@@ -33,7 +33,7 @@ desktop binary CMake does, self-test and all. There is no panel driver:
 `flush()` in `cpp/main.cpp` counts the ink and logs it, which is where one
 goes.
 
-**Homebrew's `pio` may lack the `littlefs` module** the espressif32 builder
+**[Homebrew](https://brew.sh/)'s `pio` may lack the [`littlefs`](https://github.com/littlefs-project/littlefs) module** the espressif32 builder
 wants. If a device build stops with `ModuleNotFoundError: No module named
 'littlefs'`, use `~/.platformio/penv/bin/pio`.
 
@@ -48,7 +48,7 @@ boundary.
 
 | | |
 |---|---|
-| [`docs/boundary.md`](../docs/boundary.md) | what porting to a device cost, why the runtime lives in `cpp_host`, the heap figures that become true on a device, the panel-driver seam, and what is kept in step with CrossPoint by hand |
+| [`docs/boundary.md`](../docs/boundary.md) | what porting to a device cost, why the runtime lives in `cpp_host`, the heap figures that become true on a device, the panel-driver seam, and what is kept in step with [CrossPoint](https://crosspointreader.com/) by hand |
 
 ## License
 

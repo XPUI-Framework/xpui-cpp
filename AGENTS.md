@@ -95,7 +95,7 @@ before pushing anything that touches C++ or the boundary, because CI runs
 |---|---|
 | [`README.md`](README.md) and the three nested READMEs | their paths and commands resolve; none carries a `rust` fence |
 | [`docs/README.md`](docs/README.md) | its paths resolve; the README-heading check exempts it, because it is the index of `docs/`, not a front page |
-| [`docs/tutorial.md`](docs/tutorial.md) | every `rust` fence is a doctest of `xpui-cpp-host`, mounted by `cpp_host/src/lib.rs`; every `cpp` fence is compiled by the gate |
+| [`docs/tutorial.md`](docs/tutorial.md), [`docs/tutorial-host.md`](docs/tutorial-host.md) and [`docs/tutorial-firmware.md`](docs/tutorial-firmware.md) | the tutorial in three parts; every `rust` fence is a doctest of `xpui-cpp-host`, mounted by `cpp_host/src/lib.rs`; every `cpp` fence is compiled by the gate |
 | [`docs/reference.md`](docs/reference.md) | its paths resolve; it links every page under `docs/reference/` |
 | [`docs/reference/host.md`](docs/reference/host.md) | `the reference mirrors rustdoc`, for `xpui_cpp_host`, with the `screens` items exempt as the worked example; its `rust` fences are doctests mounted by `cpp_host/src/lib.rs`, and its `cpp` fences are compiled |
 | [`docs/reference/abi.md`](docs/reference/abi.md) | written by hand against `xpui_app.h` and `xpui_host.h`, and changed with them. Every `cpp` fence is compiled against the real headers, which catches a declaration whose return type drifted; nothing compares its prose. Its headings are plain text, because `the reference mirrors rustdoc` reads this directory and a heading that is one code span names a Rust item |

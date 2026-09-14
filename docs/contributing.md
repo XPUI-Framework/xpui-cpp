@@ -4,9 +4,9 @@
 
 Four things have to be findable, and `README.md`'s `## Requirements` says
 where each may sit: `xpui-backends` beside this checkout (or
-`XPUI_BACKENDS_DIR`), the FreeInk SDK (or `FREEINK_SDK_INCLUDE`, or the
-revision `cpp_host/freeink-sdk.rev` pins, fetched by CMake), SDL2, and
-clang-format 21 or newer. `rust-toolchain.toml` pins the rest.
+`XPUI_BACKENDS_DIR`), the [FreeInk SDK](https://github.com/Free-Ink/freeink-sdk) (or `FREEINK_SDK_INCLUDE`, or the
+revision `cpp_host/freeink-sdk.rev` pins, fetched by [CMake](https://cmake.org/)), [SDL2](https://www.libsdl.org/), and
+[clang-format](https://clang.llvm.org/docs/ClangFormat.html) 21 or newer. `rust-toolchain.toml` pins the rest.
 
 ```bash
 cargo build -p xpui-cpp-host                     # the Rust archive alone
@@ -14,7 +14,7 @@ cargo build -p xpui-cpp-host                     # the Rust archive alone
 ./build-and-test.sh all                          # plus cmake, the link, nine ctest cases
 ```
 
-`all` needs CMake and Ninja; CI runs `check`, so run `all` yourself before
+`all` needs CMake and [Ninja](https://ninja-build.org/); CI runs `check`, so run `all` yourself before
 pushing anything the linker or a `ctest` case could reject.
 
 ## The gate
@@ -29,7 +29,7 @@ ignores options it does not know and formats differently with no warning.
 Three things bite here more than anywhere else:
 
 - **A C symbol exists in four places, and all four move together**: its
-  declaration in `cpp_host/cpp/xpui_host.h` or `xpui_app.h`; the Rust that
+  declaration in `cpp_host/cpp/xpui_host.h` or `xpui_app.h`; the [Rust](https://rust-lang.org/) that
   calls or defines it, in `cpp_host/src/raw.rs` or `lib.rs`; the desktop
   host's C++ under `cpp_host/cpp/`; and the firmware's under `firmware/cpp/`
   or in a file `firmware/platformio.ini` shares. `the header's symbols are

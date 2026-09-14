@@ -34,14 +34,18 @@
 #![cfg_attr(target_os = "none", no_std)]
 #![deny(missing_docs)]
 
-/// `docs/tutorial.md`, `docs/boundary.md` and the reference pages, mounted:
-/// the tutorial's and `host.md`'s snippets need the crates this one depends on,
+/// The tutorial's three pages, `docs/boundary.md` and the reference pages,
+/// mounted: the tutorial's and `host.md`'s snippets need the crates this one depends on,
 /// and `boundary.md` and `abi.md` are mounted so a fence added to either is
 /// compiled from the start.
 #[cfg(doctest)]
 mod guides {
     #[doc = include_str!("../../docs/tutorial.md")]
     pub mod tutorial {}
+    #[doc = include_str!("../../docs/tutorial-host.md")]
+    pub mod tutorial_host {}
+    #[doc = include_str!("../../docs/tutorial-firmware.md")]
+    pub mod tutorial_firmware {}
     #[doc = include_str!("../../docs/boundary.md")]
     pub mod boundary {}
     #[doc = include_str!("../../docs/reference/host.md")]
@@ -78,13 +82,14 @@ static SHELL: Shell = Shell;
 /// **Two installs, not one.** `xpui` keeps the two apart because they answer
 /// to different owners, and a host that supplies only the first gets a screen
 /// that draws perfectly and whose Back button silently does nothing.
-/// Idempotent: a firmware with a separate render task installs from every
-/// entry point that could run first.
+/// Idempotent, so a firmware with a separate render task can call it from
+/// every entry point that could run first, before the first screen exists.
 ///
 /// # Safety
-/// Call from the thread that will run the frame loop, before the first
-/// screen is created. Installing while a frame is in flight is a data race,
-/// not a stale pointer.
+/// No frame in flight on any task, and no other call to this running at the
+/// same time. The installs, and the checks that skip them, are plain statics
+/// with no locking, so overlapping one with a frame or with another call is a
+/// data race, not a stale pointer.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn xpui_app_install() {
     if !xpui::host::is_installed() {
