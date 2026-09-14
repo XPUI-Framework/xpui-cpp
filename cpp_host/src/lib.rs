@@ -34,15 +34,20 @@
 #![cfg_attr(target_os = "none", no_std)]
 #![deny(missing_docs)]
 
-/// `docs/tutorial.md` and `docs/boundary.md`, mounted: the tutorial's
-/// snippets need the crates this one depends on, and `boundary.md` is mounted
-/// so a fence added to it is compiled from the start.
+/// `docs/tutorial.md`, `docs/boundary.md` and the reference pages, mounted:
+/// the tutorial's and `host.md`'s snippets need the crates this one depends on,
+/// and `boundary.md` and `abi.md` are mounted so a fence added to either is
+/// compiled from the start.
 #[cfg(doctest)]
 mod guides {
     #[doc = include_str!("../../docs/tutorial.md")]
     pub mod tutorial {}
     #[doc = include_str!("../../docs/boundary.md")]
     pub mod boundary {}
+    #[doc = include_str!("../../docs/reference/host.md")]
+    pub mod reference_host {}
+    #[doc = include_str!("../../docs/reference/abi.md")]
+    pub mod reference_abi {}
 }
 
 extern crate alloc;

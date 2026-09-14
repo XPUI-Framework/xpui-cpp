@@ -7,9 +7,11 @@ modelled on, and what proves the two sides agree. The
 
 ## Four sets of symbols, two crossing each way
 
-Every one is declared in exactly one header. The two pointing right are
-things Rust gives you; the two pointing left are what **you** implement in
-C++.
+Every one is declared in exactly one header, and
+[the C ABI reference](reference/abi.md#the-four-headers) tables which header
+declares what and who defines it, then describes every function in the two
+this repository owns. The two pointing right are things Rust gives you; the two
+pointing left are what **you** implement in C++.
 
 ```mermaid
 flowchart LR
@@ -21,17 +23,10 @@ flowchart LR
   rust -- "xpui_host_* · answered by cpp/host_*.cpp" --> cpp
 ```
 
-| Header | Declares | Defined in | Called from |
-|---|---|---|---|
-| `xpui-backends`' `fui/cpp/xpui_fui.h` | drawing | `xpui_fui.cpp` | Rust |
-| `xpui-backends`' `fui/cpp/xpui_screen.h` | the screen lifecycle | `xpui-fui`'s `lifecycle.rs` | C++ |
-| [`cpp_host/cpp/xpui_host.h`](../cpp_host/cpp/xpui_host.h) | input, i18n, device, heap, navigation | `cpp/host_*.cpp` | Rust |
-| [`cpp_host/cpp/xpui_app.h`](../cpp_host/cpp/xpui_app.h) | install, and the root screen's factory | `src/lib.rs` | C++ |
-
 `symbols_agree` in [`xtask/src/boundary.rs`](../xtask/src/boundary.rs) reads
-the third row's header and fails when either answer to it — the desktop
+[`cpp_host/cpp/xpui_host.h`](../cpp_host/cpp/xpui_host.h) and fails when either answer to it — the desktop
 host's or the firmware's — stops carrying a name. It reads only names, and
-only that header; the fourth row, and every question about *types*, is the
+only that header; [`cpp_host/cpp/xpui_app.h`](../cpp_host/cpp/xpui_app.h), and every question about *types*, is the
 signature checker in [`abi/`](../abi/)'s. Two parameters swapped still links,
 and still corrupts the call frame.
 

@@ -37,8 +37,9 @@ everything below is one of these four boxes:
 
 The two arrows pointing left are things **you** implement in C++. The two
 pointing right are things Rust gives you. Nothing else crosses.
-[`boundary.md`](boundary.md) is the reference for all four: who defines each,
-and what proves the two sides agree.
+[The C ABI reference](reference/abi.md) is the reference for all four: who
+defines each, and every function in the two this repository owns.
+[`boundary.md`](boundary.md) says what proves the two sides agree.
 
 ---
 

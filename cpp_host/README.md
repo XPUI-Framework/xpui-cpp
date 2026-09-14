@@ -68,7 +68,8 @@ the C++ half.
 
 | | |
 |---|---|
-| [`docs/boundary.md`](../docs/boundary.md) | the four symbol sets, the firmware this host was modelled on and the three deliberate differences, and what the nine `ctest` cases prove |
+| [`docs/reference/abi.md`](../docs/reference/abi.md) | the four headers and who defines each, and every function in the two this repository owns |
+| [`docs/boundary.md`](../docs/boundary.md) | the firmware this host was modelled on and the three deliberate differences, and what the nine `ctest` cases prove |
 
 ## License
 

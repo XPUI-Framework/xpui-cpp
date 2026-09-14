@@ -25,7 +25,7 @@ symbol is defined by the C++, so the proof is `ctest`.
 ```
 
 ```text
-format · C++ format · file sizes · crates are tested · READMEs warn · prose is compiled · documented paths resolve · rustdoc links resolve · documented commands resolve · the header's symbols are all defined · documented C++ compiles · lint · tests · doctests · the C++ host compiles · README sections · AGENTS.md · published crates deny missing_docs · comment blocks · comment narration
+format · C++ format · file sizes · crates are tested · READMEs warn · prose is compiled · documented paths resolve · rustdoc links resolve · the reference mirrors rustdoc · documented commands resolve · the header's symbols are all defined · documented C++ compiles · lint · tests · doctests · the C++ host compiles · README sections · AGENTS.md · published crates deny missing_docs · comment blocks · comment narration
 + the C++ host builds, links and self-tests
 ```
 
@@ -68,7 +68,8 @@ before pushing anything that touches C++ or the boundary, because CI runs
   defines it (`cpp_host/src/raw.rs` or `lib.rs`), the desktop host's C++
   under `cpp_host/cpp/`, and the firmware's under `firmware/cpp/` or in a
   file `firmware/platformio.ini` shares. The backend's rule adds a stub
-  double; this repository has none, on purpose.
+  double; this repository has none, on purpose. `docs/reference/abi.md`
+  describes each symbol by hand, and changes with its header.
 - **`raw.rs` marks a declaration `safe fn` only when no argument can reach
   undefined behaviour.** A pointer in or out keeps `unsafe` and a `# Safety`
   section naming the rule.
@@ -95,7 +96,10 @@ before pushing anything that touches C++ or the boundary, because CI runs
 | [`README.md`](README.md) and the three nested READMEs | their paths and commands resolve; none carries a `rust` fence |
 | [`docs/README.md`](docs/README.md) | its paths resolve; the README-heading check exempts it, because it is the index of `docs/`, not a front page |
 | [`docs/tutorial.md`](docs/tutorial.md) | every `rust` fence is a doctest of `xpui-cpp-host`, mounted by `cpp_host/src/lib.rs`; every `cpp` fence is compiled by the gate |
-| [`docs/boundary.md`](docs/boundary.md) | its paths resolve; the symbol tables are what `the header's symbols are all defined` and `abi/` check; the nine cases are the ones `CMakeLists.txt` registers |
+| [`docs/reference.md`](docs/reference.md) | its paths resolve; it links every page under `docs/reference/` |
+| [`docs/reference/host.md`](docs/reference/host.md) | `the reference mirrors rustdoc`, for `xpui_cpp_host`, with the `screens` items exempt as the worked example; its `rust` fences are doctests mounted by `cpp_host/src/lib.rs`, and its `cpp` fences are compiled |
+| [`docs/reference/abi.md`](docs/reference/abi.md) | written by hand against `xpui_app.h` and `xpui_host.h`, and changed with them. Every `cpp` fence is compiled against the real headers, which catches a declaration whose return type drifted; nothing compares its prose. Its headings are plain text, because `the reference mirrors rustdoc` reads this directory and a heading that is one code span names a Rust item |
+| [`docs/boundary.md`](docs/boundary.md) | its paths resolve; the symbol sets are what `the header's symbols are all defined` and `abi/` check; the nine cases are the ones `CMakeLists.txt` registers |
 | [`docs/contributing.md`](docs/contributing.md) | every path and command it gives resolves; the umbrella command is `xpui-dev`'s |
 | `AGENTS.md` | the stage list above is compared to what the gate runs, in both modes |
 | every `///`, `//!` and C++ `//` | `rustdoc links resolve`, and the two comment checks |
