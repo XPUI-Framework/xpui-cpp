@@ -5,12 +5,12 @@ version = 4
 [[package]]
 name = "xpui"
 version = "0.1.0"
-source = "git+https://github.com/XPUI-Framework/xpui-framework?branch=main#d3d63d5d302786a2ac73f196e4adbcf88e258461"
+source = "git+https://github.com/XPUI-Framework/xpui-framework?branch=main#42c4f09a2235a4abff3086dfa24077aba985216a"
 
 [[package]]
 name = "xpui-abi-check"
 version = "0.1.0"
-source = "git+https://github.com/XPUI-Framework/xpui-backends?branch=main#1d9d72a902db46aaa6c22031768f82870a465d49"
+source = "git+https://github.com/XPUI-Framework/xpui-backends?branch=main#9206186da0bd6e7f60841dec14d69d66723356f3"
 
 [[package]]
 name = "xpui-cpp-abi"
@@ -31,7 +31,7 @@ dependencies = [
 [[package]]
 name = "xpui-fui"
 version = "0.1.0"
-source = "git+https://github.com/XPUI-Framework/xpui-backends?branch=main#1d9d72a902db46aaa6c22031768f82870a465d49"
+source = "git+https://github.com/XPUI-Framework/xpui-backends?branch=main#9206186da0bd6e7f60841dec14d69d66723356f3"
 dependencies = [
  "xpui",
 ]
